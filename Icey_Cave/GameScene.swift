@@ -14,48 +14,83 @@ class IceCube: SKSpriteNode {
     
 }
 
-class GameScene: SKScene {
-    //var balls = ["Ice_Cube"]
-    var motionManager: CMMotionManager?
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
+    var motionManager: CMMotionManager?
+    var PlayerIceCube:SKSpriteNode = SKSpriteNode()
+    var Walls:SKSpriteNode = SKSpriteNode()
+    var FireObjects:SKSpriteNode = SKSpriteNode()
+    
+    let tapRec = UITapGestureRecognizer()
+    let playerCategory:UInt32 = 0x1 << 0 // 1
+    let fireCategory:UInt32 = 0x1 << 1 // 2
+    let groundCategory:UInt32 = 0x1 << 2 // 4
+
+
     override func didMove(to view: SKView) {
-    /*    let background = SKSpriteNode(imageNamed: "checkerboard")
-        background.position = CGPoint(x: frame.midX, y: frame.midY)
-        background.alpha = 0.2
-        background.zPosition = -1
-        addChild(background)
-     */
-        //let player = SKSpriteNode(imageNamed: "Ice_Cube")
-        //let playerRadius = player.frame.width / 2.0
+        self.physicsWorld.contactDelegate = self
         
+        if let IceCubeNode:SKSpriteNode = self.childNode(withName: "IceCube") as? SKSpriteNode
+        {
+            PlayerIceCube = IceCubeNode
+        }
         
-            /*for j in stride(from: 50, to: view.bounds.height, by: player.frame.height)
-            {
-                //et ballType = balls.randomElement()!
-                //let ball = IceCube(imageNamed: ballType)
-                player.position = CGPoint(x: 300, y: 250)
-                //player.name = ballType
+        if let WallsNode:SKSpriteNode = self.childNode(withName: "Floor") as? SKSpriteNode
+        {
+            Walls = WallsNode
+        }
+        
+        if let FireObjectsNode:SKSpriteNode = self.childNode(withName: "FireObjects") as? SKSpriteNode
+        {
+            FireObjects = FireObjectsNode
+        }
+        //self.view!.isMultipleTouchEnabled = true
+        //self.view!.isUserInteractionEnabled = true
+        
+        tapRec.addTarget(self, action: #selector(GameScene.tappedView))
+        tapRec.numberOfTouchesRequired = 1
+        tapRec.numberOfTapsRequired = 1
+        self.view!.addGestureRecognizer(tapRec)
                 
-                player.physicsBody = SKPhysicsBody(circleOfRadius: playerRadius)
-                player.physicsBody?.allowsRotation = false
-                player.physicsBody?.friction = 0
-                player.physicsBody?.restitution = 0
-                
-                addChild(player)
-            }
-        */
-        
-        physicsBody = SKPhysicsBody(edgeLoopFrom: frame.inset(by: UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)))
-        
         motionManager = CMMotionManager()
         motionManager?.startAccelerometerUpdates()
- 
+        //figure out how to have all the walls collide with the player
+        //when the fire is collided with the player, game over
+        Walls.physicsBody?.categoryBitMask = groundCategory
+        PlayerIceCube.physicsBody?.collisionBitMask = groundCategory
+        FireObjects.physicsBody?.categoryBitMask = fireCategory
+        
+        PlayerIceCube.physicsBody?.categoryBitMask = playerCategory
+        Walls.physicsBody?.contactTestBitMask = playerCategory
+    }
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+        let collision:UInt32 = contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask
+        
+        if collision == groundCategory | playerCategory
+        {
+            print("collision with ice cube occured")
+        }
+    }
+    
+    @objc func tappedView() {
+        print("we tapped")
+        PlayerIceCube.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 50))
+        
     }
     
     override func update(_ currentTime: TimeInterval) {
         if let accelerometerData = motionManager?.accelerometerData
         {
-            physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -20, dy: accelerometerData.acceleration.x * 20  )
+            physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -20, dy: -9.8)
         }
+        
     }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+       // print("we tapped")
+        //PlayerIceCube.physicsBody!.applyImpulse(CGVector(dx: 0, dy: 50))
+        
+    }
+    
 }
