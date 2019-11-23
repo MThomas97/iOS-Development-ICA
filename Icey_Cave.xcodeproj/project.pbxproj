@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0399AF0B2386005C00270588 /* level1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0399AF0A2386005C00270588 /* level1.txt */; };
+		0399AF0E238606A000270588 /* Music in Resources */ = {isa = PBXBuildFile; fileRef = 0399AF0D238606A000270588 /* Music */; };
+		0399AF1023872D0600270588 /* templateLevel.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0399AF0F23872D0600270588 /* templateLevel.txt */; };
 		A0EF54FD237AB59D0082E141 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EF54FC237AB59D0082E141 /* AppDelegate.swift */; };
 		A0EF54FF237AB59D0082E141 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = A0EF54FE237AB59D0082E141 /* GameScene.sks */; };
 		A0EF5503237AB59D0082E141 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EF5502237AB59D0082E141 /* GameScene.swift */; };
@@ -36,6 +39,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0399AF0A2386005C00270588 /* level1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level1.txt; sourceTree = "<group>"; };
+		0399AF0D238606A000270588 /* Music */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Music; sourceTree = "<group>"; };
+		0399AF0F23872D0600270588 /* templateLevel.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = templateLevel.txt; sourceTree = "<group>"; };
 		A0EF54F9237AB59D0082E141 /* Icey_Cave.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Icey_Cave.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A0EF54FC237AB59D0082E141 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A0EF54FE237AB59D0082E141 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -107,8 +113,11 @@
 				A0EF5504237AB59D0082E141 /* GameViewController.swift */,
 				A0EF5506237AB59D0082E141 /* Main.storyboard */,
 				A0EF5509237AB59E0082E141 /* Assets.xcassets */,
+				0399AF0D238606A000270588 /* Music */,
 				A0EF550B237AB59E0082E141 /* LaunchScreen.storyboard */,
 				A0EF550E237AB59E0082E141 /* Info.plist */,
+				0399AF0A2386005C00270588 /* level1.txt */,
+				0399AF0F23872D0600270588 /* templateLevel.txt */,
 			);
 			path = Icey_Cave;
 			sourceTree = "<group>";
@@ -235,9 +244,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0399AF0E238606A000270588 /* Music in Resources */,
+				0399AF0B2386005C00270588 /* level1.txt in Resources */,
 				A0EF5508237AB59D0082E141 /* Main.storyboard in Resources */,
 				A0EF54FF237AB59D0082E141 /* GameScene.sks in Resources */,
 				A0EF550A237AB59E0082E141 /* Assets.xcassets in Resources */,
+				0399AF1023872D0600270588 /* templateLevel.txt in Resources */,
 				A0EF550D237AB59E0082E141 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
