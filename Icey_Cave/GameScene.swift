@@ -18,10 +18,6 @@ enum CollisionTypes : UInt32 {
     case finish = 16
 }
 
-class IceCube: SKSpriteNode {
-    
-}
-
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var motionManager: CMMotionManager?
@@ -42,8 +38,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    let tapRec = UITapGestureRecognizer()
-    
     override func didMove(to view: SKView) {
         
         scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
@@ -57,11 +51,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         loadLevel()
         createPlayer()
         createCameraNode()
-        
-        tapRec.addTarget(self, action: #selector(GameScene.tappedView))
-        tapRec.numberOfTouchesRequired = 1
-        tapRec.numberOfTapsRequired = 1
-        self.view!.addGestureRecognizer(tapRec)
                 
         motionManager = CMMotionManager()
         motionManager?.startAccelerometerUpdates()
@@ -129,12 +118,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // next level
         }
     }
-    
-    @objc func tappedView() {
-        //print("we tapped")
-        //player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 20))
-        
-    }
 
     func loadLevel() {
         guard let levelURL = Bundle.main.url(forResource: "level1", withExtension: "txt") else { fatalError("Could not find level1.txt in the app bundle.") }
@@ -148,13 +131,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let PlatformLeft = SKTexture(imageNamed: "PlatformLeft")
         let PlatformRight = SKTexture(imageNamed: "PlatformRight")
         let UnderFloor = SKTexture(imageNamed: "underFloor")
-        let HillLeft = SKTexture(imageNamed: "HillLeft")
-        let HillRight = SKTexture(imageNamed: "HillRight")
         let FireBottom = SKTexture(imageNamed: "Fire_PixelBottom")
         let FireTop = SKTexture(imageNamed: "Fire_PixelTop")
         let FireLeft = SKTexture(imageNamed: "Fire_PixelLeft")
         let FireRight = SKTexture(imageNamed: "Fire_PixelRight")
-
+        let HillLeft = childNode(withName: "m_HillLeft")
+        let HillRight = childNode(withName: "m_HillRight")
+        let m_HillRight = SKTexture(imageNamed: "HillRight")
         
         for (row, line) in lines.enumerated() {
             for (column, letter) in line.enumerated() {
@@ -163,29 +146,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 if letter == "x" {
                     //load wall
                     let node = SKSpriteNode(texture: Wall)
-                    createBlock(node, name: "Wall", position: position, CollisionType: CollisionTypes.wall)
+                    createTile(node, name: "Wall", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
                 } else if letter == "v" {
                     //load floor platform
                     let node = SKSpriteNode(texture: Floor)
-                    createBlock(node, name: "Floor", position: position, CollisionType: CollisionTypes.wall)
+                    createTile(node, name: "Floor", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
                 } else if letter == "u" {
                     //load under floor
                     let node = SKSpriteNode(texture: UnderFloor)
-                    createBlock(node, name: "underFloor", position: position, CollisionType: CollisionTypes.wall)
-                    //node.run(SKAction.repeatForever(SKAction.rotate(byAngle: .pi, duration: 1)))
+                    createTile(node, name: "underFloor", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
                 } else if letter == "l" {
                     //load fire
-                    let node = SKSpriteNode(texture: HillLeft)
+                    let node = HillLeft?.copy() as! SKSpriteNode
+                    //let node = SKSpriteNode(texture: m_HillRight)
                     node.name = "HillLeft"
-                    node.size = CGSize(width: 24, height: 24)
                     node.position = position
-                    node.physicsBody = SKPhysicsBody(texture: HillLeft, alphaThreshold: 0.9, size: node.size)
+                    //node.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+                    //node.physicsBody = SKPhysicsBody(texture: m_HillRight, size: node.size)
                     //node.physicsBody = SKPhysicsBody(edgeFrom: CGPoint(x: node.position.x - 12, y: node.position.y - 12), to: CGPoint(x: node.position.x + 12, y: node.position.y + 12))
                     
                     node.physicsBody?.isDynamic = false
@@ -200,10 +183,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     let node = SKSpriteNode(texture: FireBottom)
                     node.name = "Fire"
                     node.size = CGSize(width: 24, height: 24)
-                    node.anchorPoint = CGPoint(x: 0.5, y: 0)
-                    node.position.x = position.x
-                    node.position.y = position.y - 12
-                    node.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: node.size.width, height:  node.size.height / 2))
+                    node.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+                    node.position = position
+                    node.physicsBody = SKPhysicsBody(texture: FireBottom, size: node.size)
+                    //node.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: node.size.width - 5, height:  node.size.height / 2))
                     node.physicsBody?.isDynamic = false
                     
                     node.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
@@ -216,10 +199,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     let node = SKSpriteNode(texture: FireTop)
                     node.name = "Fire"
                     node.size = CGSize(width: 24, height: 24)
-                    node.anchorPoint = CGPoint(x: 0.5, y: 1)
-                    node.position.x = position.x
-                    node.position.y = position.y + 12
-                    node.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: node.size.width, height:  node.size.height / 2))
+                    node.position = position
+                    node.physicsBody = SKPhysicsBody(texture: FireTop, size: node.size)
                     node.physicsBody?.isDynamic = false
                     
                     node.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
@@ -232,10 +213,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     let node = SKSpriteNode(texture: FireLeft)
                     node.name = "Fire"
                     node.size = CGSize(width: 24, height: 24)
-                    node.anchorPoint = CGPoint(x: 0, y: 0.5)
-                    node.position.x = position.x - 12
-                    node.position.y = position.y
-                    node.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: node.size.width, height:  node.size.height / 2))
+                    node.position = position
+                    node.physicsBody = SKPhysicsBody(texture: FireLeft, size: node.size)
                     node.physicsBody?.isDynamic = false
                     
                     node.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
@@ -248,10 +227,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     let node = SKSpriteNode(texture: FireRight)
                     node.name = "Fire"
                     node.size = CGSize(width: 24, height: 24)
-                    node.anchorPoint = CGPoint(x: 1, y: 0.5)
-                    node.position.x = position.x + 12
-                    node.position.y = position.y
-                    node.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: node.size.width, height:  node.size.height / 2))
+                    node.position = position
+                    node.physicsBody = SKPhysicsBody(texture: FireRight, size: node.size)
                     node.physicsBody?.isDynamic = false
                     
                     node.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
@@ -264,10 +241,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     moveFire = SKSpriteNode(texture: FireBottom)
                     moveFire.name = "Fire"
                     moveFire.size = CGSize(width: 24, height: 24)
-                    moveFire.anchorPoint = CGPoint(x: 0.5, y: 0)
-                    moveFire.position.x = position.x
-                    moveFire.position.y = position.y - 12
-                    moveFire.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: moveFire.size.width, height:  moveFire.size.height / 2))
+                    moveFire.position = position
+                    moveFire.physicsBody = SKPhysicsBody(texture: FireBottom, size: moveFire.size)
                     moveFire.physicsBody?.isDynamic = false
                     
                     moveFire.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
@@ -277,22 +252,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     addChild(moveFire)
                 } else if letter == "r" {
                     //load fire
-                    let node = SKSpriteNode(texture: HillRight)
-                    createBlock(node, name: "HillRight", position: position, CollisionType: CollisionTypes.hotSurface)
-                    node.anchorPoint = CGPoint(x: 0.5, y: 1)
-                    node.zRotation = CGFloat(-45)
+                    let node = HillRight?.copy() as! SKSpriteNode
+                    createTile(node, name: "HillRight", position: position, CollisionType: CollisionTypes.hotSurface)
                     
                     addChild(node)
                 } else if letter == "t" {
                     //load fire
                     let node = SKSpriteNode(texture: PlatformLeft)
-                    createBlock(node, name: "PlatformLeft", position: position, CollisionType: CollisionTypes.wall)
+                    createTile(node, name: "PlatformLeft", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
                 } else if letter == "y" {
                     //load fire
                     let node = SKSpriteNode(texture: PlatformRight)
-                    createBlock(node, name: "PlatformRight", position: position, CollisionType: CollisionTypes.wall)
+                    createTile(node, name: "PlatformRight", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
                 } else if letter == "f" {
@@ -315,10 +288,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     fatalError("Unknown level letter: \(letter)")
                 }
             }
+            
         }
+        HillLeft?.removeFromParent()
+        HillRight?.removeFromParent()
     }
     
-    func createBlock(_ node: SKSpriteNode, name: String, position: CGPoint, CollisionType: CollisionTypes) {
+    func createTile(_ node: SKSpriteNode, name: String, position: CGPoint, CollisionType: CollisionTypes) {
         node.name = name
         node.position = position
         node.size = CGSize(width: 24, height: 24)
@@ -339,8 +315,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             {
                 isCameraReset = false
             }
-            cameraNode.position.y += 5
-            scene?.camera = cameraNode
+            else
+            {
+                cameraNode.position.y += 5
+                scene?.camera = cameraNode
+            }
         } else if let accelerometerData = motionManager?.accelerometerData
         {
             physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -20, dy: -9.8)
@@ -348,7 +327,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func didFinishUpdate() {
-        cameraNode.position.y -= 0.2
+        //cameraNode.position.y -= 0.1
         if(moveFire != nil && isMovingForward)
         {
             moveFire.run(SKAction.moveTo(x: 790, duration: 0.3))
