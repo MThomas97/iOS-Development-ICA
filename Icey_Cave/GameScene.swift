@@ -114,6 +114,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             //node.removeFromParent()
             tapCount = 0
             score += 1
+        } else if node.name == "lava" {
+            //hot surface change the scale for every second the player is on it or slowly change colour do whichever looks best
         } else if node.name == "finish" {
             // next level
         }
@@ -135,170 +137,150 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let FireTop = SKTexture(imageNamed: "Fire_PixelTop")
         let FireLeft = SKTexture(imageNamed: "Fire_PixelLeft")
         let FireRight = SKTexture(imageNamed: "Fire_PixelRight")
-        let HillLeft = childNode(withName: "m_HillLeft")
-        let HillRight = childNode(withName: "m_HillRight")
-        let m_HillRight = SKTexture(imageNamed: "HillRight")
+        let VolAltHalfLeft = SKTexture(imageNamed: "volcanoAltHalfLeft")
+        let VolAltHalfRight = SKTexture(imageNamed: "volcanoAltHalfRight")
         
+        //FIX Comment "/" so when it hits it go to next line
         for (row, line) in lines.enumerated() {
             for (column, letter) in line.enumerated() {
                 let position = CGPoint(x: (24 * column), y: (-24 * row) + 414)
                 
-                if letter == "x" {
-                    //load wall
+                switch(letter)
+                {
+                case "x":
+                    //Load wall texture
                     let node = SKSpriteNode(texture: Wall)
-                    createTile(node, name: "Wall", position: position, CollisionType: CollisionTypes.wall)
+                    createRectTile(node, name: "Wall", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
-                } else if letter == "v" {
-                    //load floor platform
+                    break
+                case "v":
+                    //load floor texture
                     let node = SKSpriteNode(texture: Floor)
-                    createTile(node, name: "Floor", position: position, CollisionType: CollisionTypes.wall)
+                    createRectTile(node, name: "Floor", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
-                } else if letter == "u" {
-                    //load under floor
+                    break
+                case "u":
+                    //load under floor texture
                     let node = SKSpriteNode(texture: UnderFloor)
-                    createTile(node, name: "underFloor", position: position, CollisionType: CollisionTypes.wall)
+                    createRectTile(node, name: "underFloor", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
-                } else if letter == "l" {
-                    //load fire
-                    let node = HillLeft?.copy() as! SKSpriteNode
-                    //let node = SKSpriteNode(texture: m_HillRight)
-                    node.name = "HillLeft"
-                    node.position = position
-                    //node.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-                    //node.physicsBody = SKPhysicsBody(texture: m_HillRight, size: node.size)
-                    //node.physicsBody = SKPhysicsBody(edgeFrom: CGPoint(x: node.position.x - 12, y: node.position.y - 12), to: CGPoint(x: node.position.x + 12, y: node.position.y + 12))
-                    
-                    node.physicsBody?.isDynamic = false
-                    
-                    node.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
-                    node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                    node.physicsBody?.collisionBitMask = 0
+                    break
+                case "l":
+                    //load volcano alt half tile leftside
+                    let node = SKSpriteNode(texture: VolAltHalfLeft)
+                    createTextureTile(node, name: "volcanoAltHalfLeft", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
-                } else if letter == "f" {
-                    //load fire
+                    break
+                case "r":
+                    //load volcano alt half tile right rightside
+                    let node = SKSpriteNode(texture: VolAltHalfRight)
+                    createTextureTile(node, name: "VolcanoAltHalfRight", position: position, CollisionType: CollisionTypes.hotSurface)
+                    
+                    addChild(node)
+                    break;
+                case "f":
+                    //load fire at bottom
                     let node = SKSpriteNode(texture: FireBottom)
-                    node.name = "Fire"
-                    node.size = CGSize(width: 24, height: 24)
-                    node.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-                    node.position = position
-                    node.physicsBody = SKPhysicsBody(texture: FireBottom, size: node.size)
-                    //node.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: node.size.width - 5, height:  node.size.height / 2))
-                    node.physicsBody?.isDynamic = false
-                    
-                    node.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
-                    node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                    node.physicsBody?.collisionBitMask = 0
+                    createTextureTile(node, name: "Fire", position: position, CollisionType: CollisionTypes.fire)
                     
                     addChild(node)
-                } else if letter == "d" {
-                    //load rotated fire
+                    break
+                case "d":
+                    //load fire Above
                     let node = SKSpriteNode(texture: FireTop)
-                    node.name = "Fire"
-                    node.size = CGSize(width: 24, height: 24)
-                    node.position = position
-                    node.physicsBody = SKPhysicsBody(texture: FireTop, size: node.size)
-                    node.physicsBody?.isDynamic = false
-                    
-                    node.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
-                    node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                    node.physicsBody?.collisionBitMask = 0
+                    createTextureTile(node, name: "Fire", position: position, CollisionType: CollisionTypes.fire)
                     
                     addChild(node)
-                } else if letter == "a" {
-                    //load rotated fire
+                    break
+                case "a":
+                    //load fire to the left
                     let node = SKSpriteNode(texture: FireLeft)
-                    node.name = "Fire"
-                    node.size = CGSize(width: 24, height: 24)
-                    node.position = position
-                    node.physicsBody = SKPhysicsBody(texture: FireLeft, size: node.size)
-                    node.physicsBody?.isDynamic = false
-                    
-                    node.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
-                    node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                    node.physicsBody?.collisionBitMask = 0
+                    createTextureTile(node, name: "Fire", position: position, CollisionType: CollisionTypes.fire)
                     
                     addChild(node)
-                } else if letter == "s" {
-                    //load rotated fire
+                    break
+                case "s":
+                    //load fire to the right
                     let node = SKSpriteNode(texture: FireRight)
-                    node.name = "Fire"
-                    node.size = CGSize(width: 24, height: 24)
-                    node.position = position
-                    node.physicsBody = SKPhysicsBody(texture: FireRight, size: node.size)
-                    node.physicsBody?.isDynamic = false
-                    
-                    node.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
-                    node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                    node.physicsBody?.collisionBitMask = 0
+                    createTextureTile(node, name: "Fire", position: position, CollisionType: CollisionTypes.fire)
                     
                     addChild(node)
-                } else if letter == "m" {
-                    //load under floor
+                    break
+                case "m":
+                    //load Moving Fire
                     moveFire = SKSpriteNode(texture: FireBottom)
-                    moveFire.name = "Fire"
-                    moveFire.size = CGSize(width: 24, height: 24)
-                    moveFire.position = position
-                    moveFire.physicsBody = SKPhysicsBody(texture: FireBottom, size: moveFire.size)
-                    moveFire.physicsBody?.isDynamic = false
-                    
-                    moveFire.physicsBody?.categoryBitMask = CollisionTypes.hotSurface.rawValue
-                    moveFire.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                    moveFire.physicsBody?.collisionBitMask = 0
+                    createTextureTile(moveFire, name: "Fire", position: position, CollisionType: CollisionTypes.fire)
                     
                     addChild(moveFire)
-                } else if letter == "r" {
-                    //load fire
-                    let node = HillRight?.copy() as! SKSpriteNode
-                    createTile(node, name: "HillRight", position: position, CollisionType: CollisionTypes.hotSurface)
-                    
-                    addChild(node)
-                } else if letter == "t" {
-                    //load fire
+                    break
+                case "t":
+                    //load Left Platform
                     let node = SKSpriteNode(texture: PlatformLeft)
-                    createTile(node, name: "PlatformLeft", position: position, CollisionType: CollisionTypes.wall)
+                    createRectTile(node, name: "PlatformLeft", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
-                } else if letter == "y" {
-                    //load fire
+                    break
+                case "y":
+                    //load right platform
                     let node = SKSpriteNode(texture: PlatformRight)
-                    createTile(node, name: "PlatformRight", position: position, CollisionType: CollisionTypes.wall)
+                    createRectTile(node, name: "PlatformRight", position: position, CollisionType: CollisionTypes.wall)
                     
                     addChild(node)
-                } else if letter == "f" {
+                    break
+                case "w":
                     //load finish point
-                    let node = SKSpriteNode(imageNamed: "finish")
-                    node.name = "finish"
-                    node.position = position
-                    node.size = CGSize(width: 24, height: 24)
-                    node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
-                    node.physicsBody?.isDynamic = false
-                    
-                    node.physicsBody?.categoryBitMask = CollisionTypes.finish.rawValue
-                    node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                    node.physicsBody?.collisionBitMask = 0
-                    
-                    addChild(node)
-                } else if letter == " " {
+                   let node = SKSpriteNode(imageNamed: "finish")
+                   node.name = "finish"
+                   node.position = position
+                   node.size = CGSize(width: 24, height: 24)
+                   node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
+                   node.physicsBody?.isDynamic = false
+                   
+                   node.physicsBody?.categoryBitMask = CollisionTypes.finish.rawValue
+                   node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
+                   node.physicsBody?.collisionBitMask = 0
+                   
+                   addChild(node)
+                   break
+                case " ":
                     //this is an empty space - do nothing!
-                } else {
+                    break;
+                case "/":
+                    //this is comment do nothing!
+                    break;
+                default:
                     fatalError("Unknown level letter: \(letter)")
                 }
+                if(letter == "/")
+                {
+                    //ignores every letter after "/" and continues onto the next line
+                    break
+                }
             }
-            
         }
-        HillLeft?.removeFromParent()
-        HillRight?.removeFromParent()
     }
     
-    func createTile(_ node: SKSpriteNode, name: String, position: CGPoint, CollisionType: CollisionTypes) {
+    func createRectTile(_ node: SKSpriteNode, name: String, position: CGPoint, CollisionType: CollisionTypes) {
         node.name = name
         node.position = position
         node.size = CGSize(width: 24, height: 24)
         node.physicsBody = SKPhysicsBody(rectangleOf: node.size)
+        node.physicsBody?.isDynamic = false
+        
+        node.physicsBody?.categoryBitMask = CollisionType.rawValue
+        node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
+        node.physicsBody?.collisionBitMask = 0
+    }
+    
+    func createTextureTile(_ node: SKSpriteNode, name: String, position: CGPoint, CollisionType: CollisionTypes) {
+        node.name = name
+        node.position = position
+        node.size = CGSize(width: 24, height: 24)
+        node.physicsBody = SKPhysicsBody(texture: node.texture!, size: node.size)
         node.physicsBody?.isDynamic = false
         
         node.physicsBody?.categoryBitMask = CollisionType.rawValue
