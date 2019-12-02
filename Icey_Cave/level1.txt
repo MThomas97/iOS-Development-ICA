@@ -2,10 +2,10 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xx                   dd        dd   xx      / x - load Wall
 xx   lr                            lxx      / v - load Floor
 xx                        ff      luxx      / u - load underFloor
-xx         ff   vvvvvvvvvvvvvvvvvvvvxx      / l - load Alt half texture leftside
+xx         ff   vvvvvvvvvvvvvjjvvvvvxx      / l - load Alt half texture leftside
 xx         ty                       xx	    / r - load Alt half texture rightside
 xx  fff                             xx	    / f - load fire at bottom
-xxvvvvvvvvvvvvvvva   svvvvvvvvvvvvvvxx	    / d - load fire at top		
+xxvvvvvvvvvvvvvvvv   vvvvvvvvvvvvvvvxx	    / d - load fire at top		
 xx              ua   su             xx	    / a - load fire to the left
 xx              ua   su             xx	    / s - load fire to the right
 xx              ua   su             xx	    / m - load moving fire at bottom
@@ -24,7 +24,7 @@ xxuuuuu   vuuuuuuuuuuuuuuuuuuuuuuuuuxx      / o - load volcano centre rounded pl
 xxuuuuu   uuuuuuuuu      uuuuuuuuuuuxx	    / p - load volcano right rounded platform
 xx m                                xx	    / q - load volcano alt half rounded platform complete
 xxvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv  xx	    / A - load volcano half rounded platform complete
-xx m                             m  xx	    / B - load volcano lava
+xx m                              m xx	    / B - load volcano lava
 xx vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvxx 	    / C - load volcano lava below
 xx                                  xx	    / D - load volcano black lava
 xx                                  xx	    / E - load volcano black lava below
