@@ -9,6 +9,7 @@
 import CoreMotion
 import SpriteKit
 import GameplayKit
+import AVFoundation
 
 enum CollisionTypes : UInt32 {
     case player = 1
@@ -21,6 +22,7 @@ enum CollisionTypes : UInt32 {
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var motionManager: CMMotionManager?
+    var backgroundMusic : AVAudioPlayer?
     var player: SKSpriteNode!
     var moveFire: Array<SKSpriteNode> = Array()
     var cameraNode = SKCameraNode()
@@ -31,8 +33,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var isCameraReset = false
     var isMovingForward = false
     var isMovingBackwards = false
+    var playerColourBlend = CGFloat(0.1)
     var tapCount = 0
-    var applyYimpulse = CGFloat(12)
+    var applyYimpulse = CGFloat(10)
+    var runOnce = 0
+    let hotSurface = SKAction.colorize(with: UIColor.red, colorBlendFactor: CGFloat(1), duration: 2.0)
     var score = 0 {
     didSet {
         scoreLabel.text = "Score: \(score)"
@@ -55,13 +60,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 
         motionManager = CMMotionManager()
         motionManager?.startAccelerometerUpdates()
+        let path = Bundle.main.path(forResource: "Music/WinterMusic.mp3", ofType:nil)!
+        let url = URL(fileURLWithPath: path)
+
+        do {
+            backgroundMusic = try AVAudioPlayer(contentsOf: url)
+            backgroundMusic?.numberOfLoops = -1 //Loops forever
+            backgroundMusic?.play()
+        } catch {
+            // couldn't load file
+        }
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
         guard let nodeA = contact.bodyA.node else { return }
         guard let nodeB = contact.bodyB.node else { return }
-
+        
         if (nodeA == player){
+            print("hit")
             playerCollided(with: nodeB)
         } else if (nodeB == player){
             playerCollided(with: nodeA)
@@ -73,7 +89,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.size = CGSize(width: 22, height: 22)
         player.name = "player"
         player.position = CGPoint(x: 800, y: 380)
-        player.zPosition = 1
+        player.zPosition = -1
         player.physicsBody = SKPhysicsBody(circleOfRadius: player.size.width / 2)
         player.physicsBody?.allowsRotation = true
         player.physicsBody?.linearDamping = 0
@@ -91,7 +107,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func playerCollided(with node: SKNode){
-        if (node.name == "Fire") {
+        if (node.physicsBody?.categoryBitMask == CollisionTypes.fire.rawValue) {
             player.physicsBody?.isDynamic = false
             isGameOver = true
             score -= 1
@@ -111,18 +127,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             
             print("Collision occured with fire")
-        } else if node.name == "Floor" {
-            //node.removeFromParent()
+        } else if node.physicsBody?.categoryBitMask == CollisionTypes.wall.rawValue {
+            if let action = player.action(forKey: "hotSurface")
+            {
+                action.speed = 0
+            }
             tapCount = 0
             score += 1
         } else if node.physicsBody?.categoryBitMask == CollisionTypes.hotSurface.rawValue {
-            if(player.colorBlendFactor == 1)
+            let hotSurface = SKAction.colorize(with: UIColor.red, colorBlendFactor: CGFloat(1.2), duration: 1.0)
+            hotSurface.speed = 1
+            player.run(hotSurface, withKey: "hotSurface")
+            playerColourBlend += 0.2
+            print(playerColourBlend)
+            if(player.colorBlendFactor >= 1)
             {
-                print("hotsurface")
                 player.physicsBody?.isDynamic = false
                 isGameOver = true
                 score -= 1
                 tapCount = 0
+                playerColourBlend = 0.1
                 let move = SKAction.move(to: node.position, duration: 0.25)
                 let scale = SKAction.scale(to: 0.0001, duration: 0.25)
                 let remove = SKAction.removeFromParent()
@@ -137,9 +161,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     }
                 }
             }
-            let Hot = SKAction.colorize(with: UIColor.red, colorBlendFactor: CGFloat(1), duration: 1.0)
-            player.run(Hot)
-            print("hot")
+        } else if node.name == "Wall" {
+            //Reset SKAction Nodes
+            if let action = player.action(forKey: "hotSurface")
+            {
+                action.speed = 0
+            }
         } else if node.name == "finish" {
             // next level
         }
@@ -205,11 +232,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     break
                 case "l":
                     //load volcano alt half tile leftside
-                    createTextureTile(VolAltHalfLeft, name: "volcanoAltHalfLeft", position: position, CollisionType: CollisionTypes.wall)
+                    createTextureTile(Lava, name: "Lava", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "r":
                     //load volcano alt half tile right rightside
-                    createTextureTile(VolAltHalfRight, name: "VolcanoAltHalfRight", position: position, CollisionType: CollisionTypes.hotSurface)
+                    createTextureTile(LavaBelow, name: "LavaBelow", position: position, CollisionType: CollisionTypes.fire)
                     break;
                 case "f":
                     //load fire at bottom
@@ -288,21 +315,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     createTextureTile(VolHalfRnd, name: "volcanoRnd", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "B":
-                    createTextureTile(Lava, name: "Lava", position: position, CollisionType: CollisionTypes.hotSurface)
-                    break
-                case "C":
-                    createTextureTile(LavaBelow, name: "LavaBelow", position: position, CollisionType: CollisionTypes.hotSurface)
-                    break
-                case "D":
                     createTextureTile(BlackLava, name: "BlackLava", position: position, CollisionType: CollisionTypes.wall)
                     break
-                case "E":
+                case "C":
                     createTextureTile(BlackLavaBelow, name: "BlackLavaBelow", position: position, CollisionType: CollisionTypes.wall)
                     break
-                case "F":
+                case "D":
                     createTextureTile(VolHalfCirLeft, name: "volcanoCirLeft", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
-                case "G":
+                case "E":
                     createTextureTile(VolHalfCirRight, name: "volcanoCirRight", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "w":
@@ -392,7 +413,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func update(_ currentTime: TimeInterval) {
         guard isGameOver == false else { return }
-    
+        print(player.colorBlendFactor)
         if(isCameraReset)
         {
             if(cameraNode.position.y >= 207)
@@ -406,7 +427,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         } else if let accelerometerData = motionManager?.accelerometerData
         {
-            physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -20, dy: -9.8)
+            physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -15, dy: -9.8)
         }
     }
     
@@ -416,17 +437,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         {
             if(moveFireIndex.position.x <= 72)
             {
-                moveFireIndex.run(SKAction.moveTo(x: 790, duration: 1.0))
+                moveFireIndex.run(SKAction.moveTo(x: 790, duration: 1.5))
                 isMovingForward = moveFireIndex.position.x >= 789 ? false : true
             }
             else if(moveFireIndex.position.x >= 789)
             {
-                moveFireIndex.run(SKAction.moveTo(x: 71, duration: 1.0))
+                moveFireIndex.run(SKAction.moveTo(x: 71, duration: 1.5))
                 isMovingForward = moveFireIndex.position.x <= 51 ? true : false
             }
         }
     
-        //FIX Camera player jumping when camera follows player
         if(player.position.y <= cameraNode.position.y)
         {
             print(cameraNode.position.y - player.position.y)
@@ -442,7 +462,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         {
             player.physicsBody!.applyImpulse(CGVector(dx: 0, dy: applyYimpulse))
             tapCount += 1
-            print("we tapped")
         }
     }
 }
