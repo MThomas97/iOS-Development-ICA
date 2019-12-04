@@ -12,24 +12,20 @@ import GameplayKit
 
 class GameViewController: UIViewController {
 
+    var startButton = UIButton()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        // load resources on other thread
         if let view = self.view as! SKView? {
-            // Load the SKScene from 'GameScene.sks'
-            if let scene = SKScene(fileNamed: "GameScene") {
-                // Set the scale mode to scale to fit the available space
+            //Load the SKScene from 'MainMenu.sks'
+            if let scene = SKScene(fileNamed: "MainMenu") {
                 scene.scaleMode = .aspectFill
                 
-                // Present the scene
                 view.presentScene(scene)
             }
-            
-            view.ignoresSiblingOrder = true
-            
+           
             view.showsFPS = true
-            view.showsPhysics = true
-            view.showsNodeCount = true
         }
     }
 

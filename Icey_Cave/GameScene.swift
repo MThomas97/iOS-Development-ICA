@@ -5,6 +5,8 @@
 //  Created by THOMAS, MICHAEL on 12/11/2019.
 //  Copyright © 2019 THOMAS, MICHAEL. All rights reserved.
 //
+//Assets used e.g
+
 
 import CoreMotion
 import SpriteKit
@@ -23,12 +25,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var motionManager: CMMotionManager?
     var backgroundMusic : AVAudioPlayer?
+    var LoseMusic : AVAudioPlayer?
     var player: SKSpriteNode!
     var moveFire: Array<SKSpriteNode> = Array()
     var cameraNode = SKCameraNode()
     var Walls: SKSpriteNode = SKSpriteNode()
     var FireObjects: SKSpriteNode = SKSpriteNode()
     var scoreLabel: SKLabelNode!
+    var restartButton: SKLabelNode!
+    var MainMenuButton: SKLabelNode!
+    var background: SKSpriteNode!
     var isGameOver = false
     var isCameraReset = false
     var isMovingForward = false
@@ -45,7 +51,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func didMove(to view: SKView) {
-        
         scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
         scoreLabel.text = "Score: 0"
         scoreLabel.horizontalAlignmentMode = .left
@@ -54,7 +59,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(scoreLabel)
         physicsWorld.contactDelegate = self
         
-        loadLevel()
         createPlayer()
         createCameraNode()
                 
@@ -106,6 +110,44 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scene?.camera = cameraNode
     }
     
+    func createRestartMenu() {
+        background = SKSpriteNode(color: UIColor.black, size: CGSize(width: (cameraNode.scene?.size.width)!, height: (cameraNode.scene?.size.height)!))
+        background.name = "RestartBackground"
+        background.alpha = CGFloat(0.5)
+        background.position = cameraNode.position
+        background.zPosition = 1
+        addChild(background)
+        
+        restartButton = SKLabelNode(fontNamed: "Chalkduster")
+        restartButton.name = "RestartButton"
+        restartButton.text = "Restart"
+        restartButton.horizontalAlignmentMode = .left
+        restartButton.position = CGPoint(x: 500,y: (scene?.camera!.position.y)!)
+        restartButton.zPosition = 2
+        addChild(restartButton)
+                
+        MainMenuButton = SKLabelNode(fontNamed: "Chalkduster")
+        MainMenuButton.name = "MainMenuButton"
+        MainMenuButton.text = "Main Menu"
+        MainMenuButton.horizontalAlignmentMode = .left
+        MainMenuButton.position = CGPoint(x: 500,y: (scene?.camera!.position.y)!)
+        MainMenuButton.zPosition = 2
+        //addChild(MainMenuButton)
+    }
+    
+    func PlayMusic(AVPlayer: AVAudioPlayer, URLpath: String) {
+        let path = Bundle.main.path(forResource: URLpath, ofType:nil)!
+        let url = URL(fileURLWithPath: path)
+        var AudioPlayer = AVPlayer
+        do {
+            AudioPlayer = try AVAudioPlayer(contentsOf: url)
+            AudioPlayer.numberOfLoops = -1 //Loops forever
+            AudioPlayer.play()
+        } catch {
+            // couldn't load file
+        }
+    }
+    
     func playerCollided(with node: SKNode){
         if (node.physicsBody?.categoryBitMask == CollisionTypes.fire.rawValue) {
             player.physicsBody?.isDynamic = false
@@ -120,12 +162,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             player.run(sequence) { [weak self] in
                 if (!((self?.player.parent) != nil))
                 {
-                    self?.createPlayer()
-                    self?.isGameOver = false
-                    self?.isCameraReset = true
+                    self?.backgroundMusic?.stop()
+                    let path = Bundle.main.path(forResource: "Music/loseMusic.wav", ofType:nil)!
+                    let url = URL(fileURLWithPath: path)
+
+                    do {
+                        self?.LoseMusic = try AVAudioPlayer(contentsOf: url)
+                        self?.LoseMusic?.numberOfLoops = -1 //Loops forever
+                        self?.LoseMusic?.play()
+                    } catch {
+                        // couldn't load file
+                    }
+                    self?.createRestartMenu()
                 }
             }
-            
             print("Collision occured with fire")
         } else if node.physicsBody?.categoryBitMask == CollisionTypes.wall.rawValue {
             if let action = player.action(forKey: "hotSurface")
@@ -155,9 +205,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 player.run(sequence) { [weak self] in
                     if (!((self?.player.parent) != nil))
                     {
-                        self?.createPlayer()
-                        self?.isGameOver = false
-                        self?.isCameraReset = true
+                        self?.createRestartMenu()
                     }
                 }
             }
@@ -172,7 +220,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
 
-    func loadLevel() {
+    public func loadLevel() {
         guard let levelURL = Bundle.main.url(forResource: "level1", withExtension: "txt") else { fatalError("Could not find level1.txt in the app bundle.") }
         guard let levelString = try? String(contentsOf: levelURL) else {
             fatalError("Could not find level1.txt in the app bundle.") }
@@ -208,9 +256,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let VolHalfCirLeft = SKTexture(imageNamed: "HalfCirLeft")
         let VolHalfCirRight = SKTexture(imageNamed: "HalfCirRight")
         
-        
         var indexOfFire = 0
-        //FIX Comment "/" so when it hits it go to next line
         for (row, line) in lines.enumerated() {
             var isEndofLine = false
             for (column, letter) in line.enumerated() {
@@ -362,7 +408,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             {
                 isEndofLine = false
                 continue
-                
             }
         }
     }
@@ -413,12 +458,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func update(_ currentTime: TimeInterval) {
         guard isGameOver == false else { return }
-        print(player.colorBlendFactor)
+        
         if(isCameraReset)
         {
             if(cameraNode.position.y >= 207)
             {
                 isCameraReset = false
+                player.speed = 1
             }
             else
             {
@@ -458,6 +504,45 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            let position = touch.location(in: view)
+            let node = atPoint(position)
+            if node.name == "RestartButton"
+            {
+                LoseMusic?.stop()
+                backgroundMusic?.play()
+                isGameOver = false
+                isCameraReset = true
+                let remove = SKAction.removeFromParent()
+                restartButton.run(remove)
+                MainMenuButton.run(remove)
+                background.alpha = 0
+                createPlayer()
+                player.speed = 0
+                //isGameOver = false
+                //isCameraReset = true
+            }
+            
+        }
+        if let touch = touches.first {
+            let position = touch.location(in: view)
+            let node = atPoint(position)
+            if node.name == "MainMenuButton"
+            {
+                print(true)
+                if let view = self.view {
+                    // Load the SKScene from 'GameScene.sks'
+                    if let scene = SKScene(fileNamed: "MainMenu") {
+                        // Set the scale mode to scale to fit the available space
+                        scene.scaleMode = .aspectFill
+                        // Present the scene
+                        view.presentScene(scene)
+                    }
+                    view.showsFPS = true
+                    view.showsNodeCount = true
+                }
+            }
+        }
         if(tapCount != 3 && !isCameraReset)
         {
             player.physicsBody!.applyImpulse(CGVector(dx: 0, dy: applyYimpulse))
