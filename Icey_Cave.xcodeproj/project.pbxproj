@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		032C9C6D23996A0300564FC5 /* AssetReferences.txt in Resources */ = {isa = PBXBuildFile; fileRef = 032C9C6C23996A0300564FC5 /* AssetReferences.txt */; };
+		032C9C6F2399706300564FC5 /* level0.txt in Resources */ = {isa = PBXBuildFile; fileRef = 032C9C6E2399706300564FC5 /* level0.txt */; };
+		032C9C722399820F00564FC5 /* Guevara.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 032C9C712399820F00564FC5 /* Guevara.ttf */; };
+		032C9C742399822200564FC5 /* IceCaps.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 032C9C732399822200564FC5 /* IceCaps.ttf */; };
 		0347DC34239669C60068C74A /* MainMenu.sks in Resources */ = {isa = PBXBuildFile; fileRef = 0347DC33239669C60068C74A /* MainMenu.sks */; };
 		0347DC3623966DC30068C74A /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0347DC3523966DC30068C74A /* MainMenu.swift */; };
 		0399AF0B2386005C00270588 /* level1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0399AF0A2386005C00270588 /* level1.txt */; };
@@ -41,6 +45,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		032C9C6C23996A0300564FC5 /* AssetReferences.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = AssetReferences.txt; sourceTree = "<group>"; };
+		032C9C6E2399706300564FC5 /* level0.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level0.txt; sourceTree = "<group>"; };
+		032C9C712399820F00564FC5 /* Guevara.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Guevara.ttf; path = ../../../../../Downloads/guevara/Guevara.ttf; sourceTree = "<group>"; };
+		032C9C732399822200564FC5 /* IceCaps.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = IceCaps.ttf; path = ../../../../../Downloads/ice_caps/IceCaps.ttf; sourceTree = "<group>"; };
 		0347DC33239669C60068C74A /* MainMenu.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = MainMenu.sks; sourceTree = "<group>"; };
 		0347DC3523966DC30068C74A /* MainMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenu.swift; sourceTree = "<group>"; };
 		0399AF0A2386005C00270588 /* level1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level1.txt; sourceTree = "<group>"; };
@@ -88,6 +96,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		032C9C70239981A600564FC5 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				032C9C732399822200564FC5 /* IceCaps.ttf */,
+				032C9C712399820F00564FC5 /* Guevara.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
 		A0EF54F0237AB59D0082E141 = {
 			isa = PBXGroup;
 			children = (
@@ -119,11 +136,14 @@
 				A0EF5504237AB59D0082E141 /* GameViewController.swift */,
 				A0EF5506237AB59D0082E141 /* Main.storyboard */,
 				A0EF5509237AB59E0082E141 /* Assets.xcassets */,
+				032C9C70239981A600564FC5 /* Fonts */,
 				0399AF0D238606A000270588 /* Music */,
 				A0EF550B237AB59E0082E141 /* LaunchScreen.storyboard */,
 				A0EF550E237AB59E0082E141 /* Info.plist */,
+				032C9C6E2399706300564FC5 /* level0.txt */,
 				0399AF0A2386005C00270588 /* level1.txt */,
 				0399AF0F23872D0600270588 /* templateLevel.txt */,
+				032C9C6C23996A0300564FC5 /* AssetReferences.txt */,
 			);
 			path = Icey_Cave;
 			sourceTree = "<group>";
@@ -250,10 +270,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				032C9C6F2399706300564FC5 /* level0.txt in Resources */,
 				0399AF0E238606A000270588 /* Music in Resources */,
 				0399AF0B2386005C00270588 /* level1.txt in Resources */,
+				032C9C742399822200564FC5 /* IceCaps.ttf in Resources */,
 				A0EF5508237AB59D0082E141 /* Main.storyboard in Resources */,
 				A0EF54FF237AB59D0082E141 /* GameScene.sks in Resources */,
+				032C9C6D23996A0300564FC5 /* AssetReferences.txt in Resources */,
+				032C9C722399820F00564FC5 /* Guevara.ttf in Resources */,
 				A0EF550A237AB59E0082E141 /* Assets.xcassets in Resources */,
 				0347DC34239669C60068C74A /* MainMenu.sks in Resources */,
 				0399AF1023872D0600270588 /* templateLevel.txt in Resources */,

@@ -12,6 +12,7 @@ import CoreMotion
 import SpriteKit
 import GameplayKit
 import AVFoundation
+import UIKit
 
 enum CollisionTypes : UInt32 {
     case player = 1
@@ -24,8 +25,9 @@ enum CollisionTypes : UInt32 {
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var motionManager: CMMotionManager?
-    var backgroundMusic : AVAudioPlayer?
-    var LoseMusic : AVAudioPlayer?
+    var RestartScene = SKScene()
+    var backgroundMusic: AVAudioPlayer?
+    var LoseMusic: AVAudioPlayer?
     var player: SKSpriteNode!
     var moveFire: Array<SKSpriteNode> = Array()
     var cameraNode = SKCameraNode()
@@ -35,6 +37,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var restartButton: SKLabelNode!
     var MainMenuButton: SKLabelNode!
     var background: SKSpriteNode!
+    var loseLabel: SKLabelNode!
+    var winLabel: SKLabelNode!
     var isGameOver = false
     var isCameraReset = false
     var isMovingForward = false
@@ -51,17 +55,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func didMove(to view: SKView) {
+        scene?.anchorPoint.y = CGFloat(0.5)
         scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
         scoreLabel.text = "Score: 0"
+        scoreLabel.name = "Test"
         scoreLabel.horizontalAlignmentMode = .left
         scoreLabel.position = CGPoint(x: 16, y: 16)
         scoreLabel.zPosition = 2
         addChild(scoreLabel)
-        physicsWorld.contactDelegate = self
         
+        physicsWorld.contactDelegate = self
         createPlayer()
         createCameraNode()
-                
+        createRestartMenu()
+        
         motionManager = CMMotionManager()
         motionManager?.startAccelerometerUpdates()
         let path = Bundle.main.path(forResource: "Music/WinterMusic.mp3", ofType:nil)!
@@ -111,28 +118,48 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func createRestartMenu() {
-        background = SKSpriteNode(color: UIColor.black, size: CGSize(width: (cameraNode.scene?.size.width)!, height: (cameraNode.scene?.size.height)!))
+        
+        background = SKSpriteNode(color: UIColor.black, size: CGSize(width: 896, height: 414))
         background.name = "RestartBackground"
-        background.alpha = CGFloat(0.5)
-        background.position = cameraNode.position
-        background.zPosition = 1
+        background.alpha = CGFloat(0.3)
+        background.position = (scene?.camera!.position)!
+        background.zPosition = 2
+        background.isHidden = true
         addChild(background)
         
-        restartButton = SKLabelNode(fontNamed: "Chalkduster")
+        restartButton = SKLabelNode(fontNamed: "Ice Caps")
         restartButton.name = "RestartButton"
         restartButton.text = "Restart"
         restartButton.horizontalAlignmentMode = .left
-        restartButton.position = CGPoint(x: 500,y: (scene?.camera!.position.y)!)
+        restartButton.position = CGPoint(x: 600, y: (scene?.camera?.position.y)!)
         restartButton.zPosition = 2
+        restartButton.isHidden = true
         addChild(restartButton)
-                
-        MainMenuButton = SKLabelNode(fontNamed: "Chalkduster")
+        
+        MainMenuButton = SKLabelNode(fontNamed: "Ice Caps")
         MainMenuButton.name = "MainMenuButton"
         MainMenuButton.text = "Main Menu"
         MainMenuButton.horizontalAlignmentMode = .left
-        MainMenuButton.position = CGPoint(x: 500,y: (scene?.camera!.position.y)!)
+        MainMenuButton.position = CGPoint(x: 250, y: (scene?.camera!.position.y)!)
         MainMenuButton.zPosition = 2
-        //addChild(MainMenuButton)
+        MainMenuButton.isHidden = true
+        addChild(MainMenuButton)
+        
+        loseLabel = SKLabelNode(fontNamed: "Guevara")
+        loseLabel.text = "You Died!"
+        loseLabel.horizontalAlignmentMode = .left
+        loseLabel.position = CGPoint(x: 350, y: (scene?.camera!.position.y)! + 80)
+        loseLabel.zPosition = 2
+        loseLabel.isHidden = true
+        addChild(loseLabel)
+        
+        winLabel = SKLabelNode(fontNamed: "Chalkduster")
+        winLabel.text = "You Beat the level!"
+        winLabel.horizontalAlignmentMode = .left
+        winLabel.position = CGPoint(x: 350, y: (scene?.camera!.position.y)! + 80)
+        winLabel.zPosition = 2
+        winLabel.isHidden = true
+        addChild(winLabel)
     }
     
     func PlayMusic(AVPlayer: AVAudioPlayer, URLpath: String) {
@@ -152,8 +179,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if (node.physicsBody?.categoryBitMask == CollisionTypes.fire.rawValue) {
             player.physicsBody?.isDynamic = false
             isGameOver = true
-            score -= 1
+            background.position.y = (scene?.camera?.position.y)!
+            loseLabel.position.y = (cameraNode.position.y + 80)
+            restartButton.position.y = cameraNode.position.y
+            MainMenuButton.position.y = cameraNode.position.y
+            background.isHidden = false
+            loseLabel.isHidden = false
+            restartButton.isHidden = false
+            MainMenuButton.isHidden = false
+            
             tapCount = 0
+            
             let move = SKAction.move(to: node.position, duration: 0.25)
             let scale = SKAction.scale(to: 0.0001, duration: 0.25)
             let remove = SKAction.removeFromParent()
@@ -173,7 +209,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     } catch {
                         // couldn't load file
                     }
-                    self?.createRestartMenu()
                 }
             }
             print("Collision occured with fire")
@@ -194,7 +229,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             {
                 player.physicsBody?.isDynamic = false
                 isGameOver = true
-                score -= 1
+                background.position.y = cameraNode.position.y
+                loseLabel.position.y = (cameraNode.position.y + 80)
+                restartButton.position.y = cameraNode.position.y
+                MainMenuButton.position.y = cameraNode.position.y
+                background.isHidden = false
+                loseLabel.isHidden = false
+                restartButton.isHidden = false
+                MainMenuButton.isHidden = false
                 tapCount = 0
                 playerColourBlend = 0.1
                 let move = SKAction.move(to: node.position, duration: 0.25)
@@ -215,8 +257,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             {
                 action.speed = 0
             }
-        } else if node.name == "finish" {
-            // next level
+        } else if node.name == "finishPoint" {
+            player.physicsBody?.isDynamic = false
+            isGameOver = true
+            background.position.y = cameraNode.position.y
+            winLabel.position.y = (cameraNode.position.y + 80)
+            restartButton.position.y = cameraNode.position.y
+            MainMenuButton.position.y = cameraNode.position.y
+            background.isHidden = false
+            winLabel.isHidden = false
+            restartButton.isHidden = false
+            MainMenuButton.isHidden = false
         }
     }
 
@@ -372,21 +423,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 case "E":
                     createTextureTile(VolHalfCirRight, name: "volcanoCirRight", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
-                case "w":
-                    //load finish point
-                   let node = SKSpriteNode(imageNamed: "finish")
-                   node.name = "finish"
-                   node.position = position
-                   node.size = CGSize(width: 24, height: 24)
-                   node.physicsBody = SKPhysicsBody(circleOfRadius: node.size.width / 2)
-                   node.physicsBody?.isDynamic = false
-                   
-                   node.physicsBody?.categoryBitMask = CollisionTypes.finish.rawValue
-                   node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
-                   node.physicsBody?.collisionBitMask = 0
-                   
-                   addChild(node)
-                   break
                 case " ":
                     //this is an empty space - do nothing!
                     break;
@@ -457,21 +493,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        guard isGameOver == false else { return }
         
+        print(scene?.camera?.position.y)
+        print(player.position.y)
+        if((scene?.camera?.position.y)! > player.position.y)
+        {
+            score += 1
+        }
         if(isCameraReset)
         {
             if(cameraNode.position.y >= 207)
             {
                 isCameraReset = false
-                player.speed = 1
+                isGameOver = false
             }
             else
             {
                 cameraNode.position.y += 5
                 scene?.camera = cameraNode
             }
-        } else if let accelerometerData = motionManager?.accelerometerData
+        }
+        guard isGameOver == false else { return }
+        if let accelerometerData = motionManager?.accelerometerData
         {
             physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -15, dy: -9.8)
         }
@@ -505,43 +548,34 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
-            let position = touch.location(in: view)
+            let position = touch.location(in: self)
             let node = atPoint(position)
+            print(node.position)
             if node.name == "RestartButton"
             {
+                restartButton.isHidden = true
+                background.isHidden = true
+                MainMenuButton.isHidden = true
+                loseLabel.isHidden = true
                 LoseMusic?.stop()
                 backgroundMusic?.play()
-                isGameOver = false
                 isCameraReset = true
-                let remove = SKAction.removeFromParent()
-                restartButton.run(remove)
-                MainMenuButton.run(remove)
-                background.alpha = 0
                 createPlayer()
-                player.speed = 0
-                //isGameOver = false
-                //isCameraReset = true
-            }
-            
-        }
-        if let touch = touches.first {
-            let position = touch.location(in: view)
-            let node = atPoint(position)
-            if node.name == "MainMenuButton"
-            {
-                print(true)
-                if let view = self.view {
-                    // Load the SKScene from 'GameScene.sks'
-                    if let scene = SKScene(fileNamed: "MainMenu") {
-                        // Set the scale mode to scale to fit the available space
-                        scene.scaleMode = .aspectFill
-                        // Present the scene
-                        view.presentScene(scene)
-                    }
-                    view.showsFPS = true
-                    view.showsNodeCount = true
-                }
-            }
+            } else if node.name == "MainMenuButton"
+              {
+                  print(true)
+                  if let view = self.view {
+                      // Load the SKScene from 'GameScene.sks'
+                      if let scene = SKScene(fileNamed: "MainMenu") {
+                          // Set the scale mode to scale to fit the available space
+                          scene.scaleMode = .aspectFill
+                          // Present the scene
+                          view.presentScene(scene)
+                      }
+                      view.showsFPS = true
+                      view.showsNodeCount = true
+                  }
+              }
         }
         if(tapCount != 3 && !isCameraReset)
         {

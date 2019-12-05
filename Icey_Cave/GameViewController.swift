@@ -24,7 +24,6 @@ class GameViewController: UIViewController {
                 
                 view.presentScene(scene)
             }
-           
             view.showsFPS = true
         }
     }

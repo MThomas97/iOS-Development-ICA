@@ -41,5 +41,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>IceCaps.ttf</string>
+		<string>Guevara.ttf</string>
+	</array>
 </dict>
 </plist>

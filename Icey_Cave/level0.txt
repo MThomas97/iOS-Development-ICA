@@ -1,0 +1,33 @@
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+xx                     dd      dd   xx      / x - load Wall
+xx   lr                             xx      / v - load Floor
+xx                                  xx      / u - load underFloor
+xx              vvvvvvvvvvvvvvvvvvvvxx      / l - load volcano lava
+xx         ty                       xx      / r - load volcano lava below
+xx  fff                             xx      / f - load fire at bottom
+xxvvvvvvvvvvvvvvvv   vvvvvvvvvvvvvvvxx      / d - load fire at top
+xx              ua   su             xx      / a - load fire to the left
+xx              ua   su             xx      / s - load fire to the right
+xx              ua   su             xx      / m - load moving fire at bottom
+xx              ua   su             xx      / t - load volcano alt left rounded platform
+xx              ua   su             xx      / y - load volcano alt right rounded platform
+xx              ua   su             xx      / b - load volcano alt texture left
+xx                                  xx      / c - load volcano alt texture centre
+xx                                  xx      / e - load volcano alt texture right
+xx                                  xx      / g - load volcano alt half circle texture left
+xxvf          fvvvvvvvvvvvvvvvvvvvvvxx      / h - load volcano alt half circle texture right
+xxuvf        fvuuuuuuuuuuuuuuuuuuuuuxx      / i - load volcano texture left
+xxuuvf      fvuuuuuuuuuuuuuuuuuuuuuuxx      / j - load volcano texture centre
+xxuuuvf    fvuuuuuuuuuuuuuuuuuuuuuuuxx      / k - load volcano texture right
+xxuuuuv    vuuuuuuuuuuuuuuuuuuuuuuuuxx      / n - load volcano left rounded platform
+xxuuuuuu  vuuuuuuuuuuuuuuuuuuuuuuuuuxx      / o - load volcano centre rounded platform
+xx     u  u                         xx      / p - load volcano right rounded platform
+xx                                  xx      / q - load volcano alt half rounded platform complete
+xxvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv  xx      / A - load volcano half rounded platform complete
+xx                                  xx      / B - load volcano black lava
+xx                                  xx      / C - load volcano black lava below
+xx vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvxx      / D - load volcano half Rounded circle texture left
+xx                ddddd             xx      / E - load volcano half Rounded circle texture right
+xx  ty                    ty        xx      / w - load finish point
+xx       tyffffty                   xx
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv  vv

@@ -34,14 +34,14 @@ class MainMenu: SKScene {
                  // couldn't load file
              }
         //Loads the SKLabelNodes
-        let GameName = SKLabelNode(fontNamed: "Chalkduster")
+        let GameName = SKLabelNode(fontNamed: "Ice Caps")
         GameName.text = "Icey Cave"
         GameName.horizontalAlignmentMode = .left
-        GameName.position = CGPoint(x: 400, y: 300)
+        GameName.position = CGPoint(x: 350, y: 300)
         GameName.zPosition = 2
         addChild(GameName)
         
-        let playButton = SKLabelNode(fontNamed: "Chalkduster")
+        let playButton = SKLabelNode(fontNamed: "IceCaps")
         playButton.text = "Play!"
         playButton.horizontalAlignmentMode = .left
         playButton.position = CGPoint(x: 400, y: 207)
@@ -53,7 +53,7 @@ class MainMenu: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         DispatchQueue.main.async { [weak self] in
         if let touch = touches.first {
-            let position = touch.location(in: self?.view)
+            let position = touch.location(in: (self?.scene)!)
             let node = self?.atPoint(position)
             if node?.name == "StartButton"
             {
