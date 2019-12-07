@@ -43,22 +43,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var isCameraReset = false
     var isMovingForward = false
     var isMovingBackwards = false
+    var tempPlayerPos = CGFloat(0)
     var playerColourBlend = CGFloat(0.1)
     var tapCount = 0
-    var applyYimpulse = CGFloat(10)
+    var applyYimpulse = CGFloat(5)
     var runOnce = 0
     let hotSurface = SKAction.colorize(with: UIColor.red, colorBlendFactor: CGFloat(1), duration: 2.0)
-    var score = 0 {
+    var score = CGFloat(0) {
     didSet {
-        scoreLabel.text = "Score: \(score)"
+        scoreLabel.text = "Depth: \(score)ft"
         }
     }
     
     override func didMove(to view: SKView) {
         scene?.anchorPoint.y = CGFloat(0.5)
-        scoreLabel = SKLabelNode(fontNamed: "Chalkduster")
+        scoreLabel = SKLabelNode(fontNamed: "Ice Caps")
         scoreLabel.text = "Score: 0"
-        scoreLabel.name = "Test"
         scoreLabel.horizontalAlignmentMode = .left
         scoreLabel.position = CGPoint(x: 16, y: 16)
         scoreLabel.zPosition = 2
@@ -69,6 +69,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         createCameraNode()
         createRestartMenu()
         
+        tempPlayerPos = player.position.y
+        
         motionManager = CMMotionManager()
         motionManager?.startAccelerometerUpdates()
         let path = Bundle.main.path(forResource: "Music/WinterMusic.mp3", ofType:nil)!
@@ -77,7 +79,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         do {
             backgroundMusic = try AVAudioPlayer(contentsOf: url)
             backgroundMusic?.numberOfLoops = -1 //Loops forever
+            backgroundMusic?.prepareToPlay()
             backgroundMusic?.play()
+        } catch {
+            // couldn't load file
+        }
+        
+        let Losepath = Bundle.main.path(forResource: "Music/loseMusic.wav", ofType:nil)!
+        let Loseurl = URL(fileURLWithPath: Losepath)
+
+        do {
+            LoseMusic = try AVAudioPlayer(contentsOf: Loseurl)
+            LoseMusic?.numberOfLoops = -1 //Loops forever
+            LoseMusic?.prepareToPlay()
         } catch {
             // couldn't load file
         }
@@ -121,7 +135,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         background = SKSpriteNode(color: UIColor.black, size: CGSize(width: 896, height: 414))
         background.name = "RestartBackground"
-        background.alpha = CGFloat(0.3)
+        background.alpha = CGFloat(0.5)
         background.position = (scene?.camera!.position)!
         background.zPosition = 2
         background.isHidden = true
@@ -130,8 +144,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         restartButton = SKLabelNode(fontNamed: "Ice Caps")
         restartButton.name = "RestartButton"
         restartButton.text = "Restart"
+        restartButton.fontSize = CGFloat(40)
         restartButton.horizontalAlignmentMode = .left
-        restartButton.position = CGPoint(x: 600, y: (scene?.camera?.position.y)!)
+        restartButton.position = CGPoint(x: 520, y: (scene?.camera?.position.y)!)
         restartButton.zPosition = 2
         restartButton.isHidden = true
         addChild(restartButton)
@@ -139,27 +154,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         MainMenuButton = SKLabelNode(fontNamed: "Ice Caps")
         MainMenuButton.name = "MainMenuButton"
         MainMenuButton.text = "Main Menu"
+        MainMenuButton.fontSize = CGFloat(40)
         MainMenuButton.horizontalAlignmentMode = .left
-        MainMenuButton.position = CGPoint(x: 250, y: (scene?.camera!.position.y)!)
+        MainMenuButton.position = CGPoint(x: 210, y: (scene?.camera!.position.y)!)
         MainMenuButton.zPosition = 2
         MainMenuButton.isHidden = true
         addChild(MainMenuButton)
         
         loseLabel = SKLabelNode(fontNamed: "Guevara")
         loseLabel.text = "You Died!"
+        loseLabel.fontSize = CGFloat(40)
         loseLabel.horizontalAlignmentMode = .left
         loseLabel.position = CGPoint(x: 350, y: (scene?.camera!.position.y)! + 80)
         loseLabel.zPosition = 2
         loseLabel.isHidden = true
         addChild(loseLabel)
-        
-        winLabel = SKLabelNode(fontNamed: "Chalkduster")
-        winLabel.text = "You Beat the level!"
-        winLabel.horizontalAlignmentMode = .left
-        winLabel.position = CGPoint(x: 350, y: (scene?.camera!.position.y)! + 80)
-        winLabel.zPosition = 2
-        winLabel.isHidden = true
-        addChild(winLabel)
     }
     
     func PlayMusic(AVPlayer: AVAudioPlayer, URLpath: String) {
@@ -199,16 +208,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 if (!((self?.player.parent) != nil))
                 {
                     self?.backgroundMusic?.stop()
-                    let path = Bundle.main.path(forResource: "Music/loseMusic.wav", ofType:nil)!
-                    let url = URL(fileURLWithPath: path)
-
-                    do {
-                        self?.LoseMusic = try AVAudioPlayer(contentsOf: url)
-                        self?.LoseMusic?.numberOfLoops = -1 //Loops forever
-                        self?.LoseMusic?.play()
-                    } catch {
-                        // couldn't load file
-                    }
+                    self?.LoseMusic?.play()
                 }
             }
             print("Collision occured with fire")
@@ -218,7 +218,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 action.speed = 0
             }
             tapCount = 0
-            score += 1
         } else if node.physicsBody?.categoryBitMask == CollisionTypes.hotSurface.rawValue {
             let hotSurface = SKAction.colorize(with: UIColor.red, colorBlendFactor: CGFloat(1.2), duration: 1.0)
             hotSurface.speed = 1
@@ -247,7 +246,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 player.run(sequence) { [weak self] in
                     if (!((self?.player.parent) != nil))
                     {
-                        self?.createRestartMenu()
+                        self?.backgroundMusic?.stop()
+                        self?.LoseMusic?.play()
                     }
                 }
             }
@@ -459,7 +459,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         node.physicsBody?.categoryBitMask = CollisionType.rawValue
         node.physicsBody?.contactTestBitMask = CollisionTypes.player.rawValue
         node.physicsBody?.collisionBitMask = 0
-        
+
         addChild(node)
     }
     
@@ -496,8 +496,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         print(scene?.camera?.position.y)
         print(player.position.y)
-        if((scene?.camera?.position.y)! > player.position.y)
+        if(player.position.y <=  tempPlayerPos - 100)
         {
+            tempPlayerPos = player.position.y
             score += 1
         }
         if(isCameraReset)
@@ -553,14 +554,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             print(node.position)
             if node.name == "RestartButton"
             {
+                score = 0
+                LoseMusic?.stop()
+                backgroundMusic?.play()
                 restartButton.isHidden = true
                 background.isHidden = true
                 MainMenuButton.isHidden = true
                 loseLabel.isHidden = true
-                LoseMusic?.stop()
-                backgroundMusic?.play()
                 isCameraReset = true
                 createPlayer()
+                tempPlayerPos = player.position.y
             } else if node.name == "MainMenuButton"
               {
                   print(true)
@@ -579,7 +582,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         if(tapCount != 3 && !isCameraReset)
         {
-            player.physicsBody!.applyImpulse(CGVector(dx: 0, dy: applyYimpulse))
+            player.physicsBody!.applyImpulse(CGVector(dx: 1, dy: applyYimpulse))
             tapCount += 1
         }
     }

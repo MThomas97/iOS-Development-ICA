@@ -36,13 +36,15 @@ class MainMenu: SKScene {
         //Loads the SKLabelNodes
         let GameName = SKLabelNode(fontNamed: "Ice Caps")
         GameName.text = "Icey Cave"
+        GameName.fontSize = CGFloat(40)
         GameName.horizontalAlignmentMode = .left
-        GameName.position = CGPoint(x: 350, y: 300)
+        GameName.position = CGPoint(x: 360, y: 300)
         GameName.zPosition = 2
         addChild(GameName)
         
         let playButton = SKLabelNode(fontNamed: "IceCaps")
         playButton.text = "Play!"
+        playButton.fontSize = CGFloat(40)
         playButton.horizontalAlignmentMode = .left
         playButton.position = CGPoint(x: 400, y: 207)
         playButton.zPosition = 2
