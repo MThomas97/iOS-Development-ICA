@@ -38,7 +38,7 @@ class MainMenu: SKScene {
         GameName.text = "Icey Cave"
         GameName.fontSize = CGFloat(40)
         GameName.horizontalAlignmentMode = .left
-        GameName.position = CGPoint(x: 360, y: 300)
+        GameName.position = CGPoint(x: 365, y: 300)
         GameName.zPosition = 2
         addChild(GameName)
         
