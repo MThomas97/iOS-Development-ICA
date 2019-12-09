@@ -11,6 +11,8 @@
 		032C9C6F2399706300564FC5 /* level0.txt in Resources */ = {isa = PBXBuildFile; fileRef = 032C9C6E2399706300564FC5 /* level0.txt */; };
 		032C9C722399820F00564FC5 /* Guevara.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 032C9C712399820F00564FC5 /* Guevara.ttf */; };
 		032C9C742399822200564FC5 /* IceCaps.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 032C9C732399822200564FC5 /* IceCaps.ttf */; };
+		0331B0E4239D2AB800A45444 /* LoadingScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0331B0E3239D2AB800A45444 /* LoadingScene.swift */; };
+		0331B0E6239D410500A45444 /* LoadingScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 0331B0E5239D410500A45444 /* LoadingScene.sks */; };
 		0347DC34239669C60068C74A /* MainMenu.sks in Resources */ = {isa = PBXBuildFile; fileRef = 0347DC33239669C60068C74A /* MainMenu.sks */; };
 		0347DC3623966DC30068C74A /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0347DC3523966DC30068C74A /* MainMenu.swift */; };
 		0399AF0B2386005C00270588 /* level1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 0399AF0A2386005C00270588 /* level1.txt */; };
@@ -49,6 +51,8 @@
 		032C9C6E2399706300564FC5 /* level0.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level0.txt; sourceTree = "<group>"; };
 		032C9C712399820F00564FC5 /* Guevara.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Guevara.ttf; path = ../../../../../Downloads/guevara/Guevara.ttf; sourceTree = "<group>"; };
 		032C9C732399822200564FC5 /* IceCaps.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = IceCaps.ttf; path = ../../../../../Downloads/ice_caps/IceCaps.ttf; sourceTree = "<group>"; };
+		0331B0E3239D2AB800A45444 /* LoadingScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingScene.swift; sourceTree = "<group>"; };
+		0331B0E5239D410500A45444 /* LoadingScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = LoadingScene.sks; sourceTree = "<group>"; };
 		0347DC33239669C60068C74A /* MainMenu.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = MainMenu.sks; sourceTree = "<group>"; };
 		0347DC3523966DC30068C74A /* MainMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenu.swift; sourceTree = "<group>"; };
 		0399AF0A2386005C00270588 /* level1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = level1.txt; sourceTree = "<group>"; };
@@ -134,6 +138,8 @@
 				A0EF54FE237AB59D0082E141 /* GameScene.sks */,
 				A0EF5502237AB59D0082E141 /* GameScene.swift */,
 				A0EF5504237AB59D0082E141 /* GameViewController.swift */,
+				0331B0E5239D410500A45444 /* LoadingScene.sks */,
+				0331B0E3239D2AB800A45444 /* LoadingScene.swift */,
 				A0EF5506237AB59D0082E141 /* Main.storyboard */,
 				A0EF5509237AB59E0082E141 /* Assets.xcassets */,
 				032C9C70239981A600564FC5 /* Fonts */,
@@ -270,6 +276,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0331B0E6239D410500A45444 /* LoadingScene.sks in Resources */,
 				032C9C6F2399706300564FC5 /* level0.txt in Resources */,
 				0399AF0E238606A000270588 /* Music in Resources */,
 				0399AF0B2386005C00270588 /* level1.txt in Resources */,
@@ -306,6 +313,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0331B0E4239D2AB800A45444 /* LoadingScene.swift in Sources */,
 				A0EF5503237AB59D0082E141 /* GameScene.swift in Sources */,
 				A0EF5505237AB59D0082E141 /* GameViewController.swift in Sources */,
 				A0EF54FD237AB59D0082E141 /* AppDelegate.swift in Sources */,

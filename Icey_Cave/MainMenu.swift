@@ -14,15 +14,10 @@ import AVFoundation
 class MainMenu: SKScene {
 
     var GameSceneLevel: GameScene!
+    var StoredGameLevel: GameScene!
+    var LoadingScreen: LoadingScene!
     var TitleScreenMusic: AVAudioPlayer?
     override func didMove(to view: SKView) {
-        //Preloads GameScene level in another thread
-        DispatchQueue.global(qos: .userInteractive).async { [weak self] in
-            self?.GameSceneLevel = GameScene(fileNamed: "GameScene")!
-            self?.GameSceneLevel.scaleMode = .aspectFill
-            self?.GameSceneLevel.loadLevel()
-        }
-        
         let path = Bundle.main.path(forResource: "Music/TitleMusic.mp3", ofType:nil)!
              let url = URL(fileURLWithPath: path)
 
@@ -52,21 +47,28 @@ class MainMenu: SKScene {
         addChild(playButton)
     }
     
+    public func SetGameScene(_ scene: GameScene) {
+        GameSceneLevel = scene
+        GameSceneLevel.storedLevel = scene
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         DispatchQueue.main.async { [weak self] in
         if let touch = touches.first {
             let position = touch.location(in: (self?.scene)!)
             let node = self?.atPoint(position)
-            if node?.name == "StartButton"
-            {
-                if let view = self?.view {
-                        // Present the scene
-                        view.presentScene(self?.GameSceneLevel)
-                        view.ignoresSiblingOrder = true
-                        view.showsFPS = true
-                        view.showsPhysics = true
-                        view.showsNodeCount = true
-                        view.showsDrawCount = true
+                if node?.name == "StartButton"
+                {
+                 if let view = self?.view {
+                    
+                    self?.TitleScreenMusic?.stop()
+                    
+                    view.presentScene(self?.GameSceneLevel)
+                    view.ignoresSiblingOrder = true
+                    view.showsFPS = true
+                    view.showsPhysics = true
+                    view.showsNodeCount = true
+                    view.showsDrawCount = true
                     }
                 }
             }

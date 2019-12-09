@@ -24,6 +24,8 @@ enum CollisionTypes : UInt32 {
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
+    var MainMenuScene: MainMenu!
+    var storedLevel: GameScene!
     var motionManager: CMMotionManager?
     var RestartScene = SKScene()
     var backgroundMusic: AVAudioPlayer?
@@ -47,8 +49,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var tempPlayerPos = CGFloat(0)
     var playerColourBlend = CGFloat(0.1)
     var tapCount = 0
-    var applyYimpulse = CGFloat(6)
-    var resetCameraSpeed = CGFloat(12)
+    var applyYimpulse = CGFloat(5)
+    var resetCameraSpeed = CGFloat(8)
     var runOnce = 0
     let hotSurface = SKAction.colorize(with: UIColor.red, colorBlendFactor: CGFloat(1), duration: 2.0)
     var score = 0 {
@@ -57,24 +59,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    override func didMove(to view: SKView) {
-        scene?.anchorPoint.y = CGFloat(0.5)
-        scoreLabel = SKLabelNode(fontNamed: "Ice Caps")
-        scoreLabel.text = "0ft"
-        scoreLabel.horizontalAlignmentMode = .left
-        scoreLabel.position = CGPoint(x: 50, y: 20)
-        scoreLabel.zPosition = 2
-        addChild(scoreLabel)
-        
-        physicsWorld.contactDelegate = self
-        
-        createPlayer()
-        createCameraNode()
-        createRestartMenu()
+    override func sceneDidLoad() {
         
         UserDefaults().set(0, forKey: "HIGHSCORE")
-        
-        tempPlayerPos = player.position.y
         
         motionManager = CMMotionManager()
         motionManager?.startAccelerometerUpdates()
@@ -85,21 +72,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             backgroundMusic = try AVAudioPlayer(contentsOf: url)
             backgroundMusic?.numberOfLoops = -1 //Loops forever
             backgroundMusic?.prepareToPlay()
-            backgroundMusic?.play()
         } catch {
             // couldn't load file
         }
         
         let Losepath = Bundle.main.path(forResource: "Music/loseMusic.wav", ofType:nil)!
-        let Loseurl = URL(fileURLWithPath: Losepath)
+        let loseUrl = URL(fileURLWithPath: Losepath)
 
         do {
-            LoseMusic = try AVAudioPlayer(contentsOf: Loseurl)
+            LoseMusic = try AVAudioPlayer(contentsOf: loseUrl)
             LoseMusic?.numberOfLoops = -1 //Loops forever
             LoseMusic?.prepareToPlay()
         } catch {
             // couldn't load file
         }
+    }
+    
+    override func didMove(to view: SKView) {
+        isGameOver = false
+        backgroundMusic?.play()
+        physicsWorld.contactDelegate = self
+        createPlayer()
+        tempPlayerPos = player.position.y
     }
     
     func createSKLabel(_ node: SKLabelNode, name: String, text: String, fontSize: Int , position: CGPoint, isHidden: Bool)
@@ -150,6 +144,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func createRestartMenu() {
         
+        scoreLabel = SKLabelNode(fontNamed: "Ice Caps")
+        scoreLabel.text = "0ft"
+        scoreLabel.horizontalAlignmentMode = .left
+        scoreLabel.position = CGPoint(x: 50, y: 20)
+        scoreLabel.zPosition = 2
+        addChild(scoreLabel)
+        
         background = SKSpriteNode(color: UIColor.black, size: CGSize(width: 950, height: 450))
         background.name = "RestartBackground"
         background.alpha = CGFloat(0.7)
@@ -194,7 +195,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.physicsBody?.isDynamic = false
         isGameOver = true
         scoreLabel.isHidden = true
-        //background.position = (scene?.camera?.position)!
+        background.position = (scene?.camera?.position)!
         loseLabel.position.y = (cameraNode.position.y + 80)
         loseLabel.text = "Depth: \(score)"
         HighScoreLabel.position.y = (cameraNode.position.y + 120)
@@ -221,8 +222,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.run(sequence) { [weak self] in
             if (!((self?.player.parent) != nil))
             {
-                self?.backgroundMusic?.stop()
                 self?.LoseMusic?.play()
+                self?.backgroundMusic?.stop()
             }
         }
     }
@@ -241,7 +242,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             hotSurface.speed = 1
             player.run(hotSurface, withKey: "hotSurface")
             playerColourBlend += 0.2
-            print(playerColourBlend)
+            
             if(player.colorBlendFactor >= 1)
             {
                 SetDeathScreen(node)
@@ -254,12 +255,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
     }
-
-    public func preLoadTextures()
-    {
-        //Figure a way to preload textures into an array and preload them into memory
-        //and if the for loop is the issue like it hasnt completed the level yet then keep the level in memory?
-    }
     
     public func loadLevel() {
         guard let levelURL = Bundle.main.url(forResource: "level1", withExtension: "txt") else { fatalError("Could not find level1.txt in the app bundle.") }
@@ -268,37 +263,41 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let lines = levelString.components(separatedBy: "\n")
         //Load image files
+        var texturesArray: Array<SKTexture> = Array()
         
-        let Wall = SKTexture(imageNamed: "Wall")
-        let Floor = SKTexture(imageNamed: "Floor")
-        let UnderFloor = SKTexture(imageNamed: "underFloor")
-        let FireBottom = SKTexture(imageNamed: "Fire_PixelBottom")
-        let FireTop = SKTexture(imageNamed: "Fire_PixelTop")
-        let FireLeft = SKTexture(imageNamed: "Fire_PixelLeft")
-        let FireRight = SKTexture(imageNamed: "Fire_PixelRight")
-        let VolAltHalfLeft = SKTexture(imageNamed: "volcanoAltHalfLeft")
-        let VolAltHalfCentre = SKTexture(imageNamed: "volcanoAltHalfMid")
-        let VolAltHalfRight = SKTexture(imageNamed: "volcanoAltHalfRight")
-        let VolAltTextureLeft = SKTexture(imageNamed: "volcanoAltLeft")
-        let VolAltTextureCentre = SKTexture(imageNamed: "volcanoAltCentre")
-        let VolAltTextureRight = SKTexture(imageNamed: "volcanoAltRight")
-        let VolAltHalfCirLeft = SKTexture(imageNamed: "volcanoHalfCirLeft")
-        let VolAltHalfCirRight = SKTexture(imageNamed: "volcanoHalfCirRight")
-        let VolTextureLeft = SKTexture(imageNamed: "volcanoLeft")
-        let VolTextureCentre = SKTexture(imageNamed: "volcanoCentre")
-        let VolTextureRight = SKTexture(imageNamed: "volcanoRight")
-        let VolHalfRndLeft = SKTexture(imageNamed: "volcanoHalfLeft")
-        let VolHalfRndCentre = SKTexture(imageNamed: "volcanoHalfMid")
-        let VolHalfRndRight = SKTexture(imageNamed: "volcanoHalfRight")
-        let VolAltHalfRnd = SKTexture(imageNamed: "volcanoAltHalfRnd")
-        let VolHalfRnd = SKTexture(imageNamed: "volcanoHalfRnd")
-        let Lava = SKTexture(imageNamed: "volcanoLava")
-        let LavaBelow = SKTexture(imageNamed: "volcanoLavaBelow")
-        let BlackLava = SKTexture(imageNamed: "BlackLava")
-        let BlackLavaBelow = SKTexture(imageNamed: "BlackLavaBelow")
-        let VolHalfCirLeft = SKTexture(imageNamed: "HalfCirLeft")
-        let VolHalfCirRight = SKTexture(imageNamed: "HalfCirRight")
-        
+        //let Wall = SKTexture(imageNamed: "Wall")
+        texturesArray.append(SKTexture(imageNamed: "Wall"))
+        texturesArray.append(SKTexture(imageNamed: "Floor"))
+        texturesArray.append(SKTexture(imageNamed: "underFloor"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoLava"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoLavaBelow"))
+        texturesArray.append(SKTexture(imageNamed: "Fire_PixelBottom"))
+        texturesArray.append(SKTexture(imageNamed: "Fire_PixelTop"))
+        texturesArray.append(SKTexture(imageNamed: "Fire_PixelLeft"))
+        texturesArray.append(SKTexture(imageNamed: "Fire_PixelRight"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoAltHalfLeft"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoAltHalfMid"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoAltHalfRight"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoAltLeft"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoAltCentre"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoAltRight"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoHalfCirLeft"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoHalfCirRight"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoLeft"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoCentre"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoRight"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoHalfLeft"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoHalfMid"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoHalfRight"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoAltHalfRnd"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoHalfRnd"))
+        texturesArray.append(SKTexture(imageNamed: "BlackLava"))
+        texturesArray.append(SKTexture(imageNamed: "BlackLavaBelow"))
+        texturesArray.append(SKTexture(imageNamed: "HalfCirLeft"))
+        texturesArray.append(SKTexture(imageNamed: "HalfCirRight"))
+        texturesArray.append(SKTexture(imageNamed: "volcanoAltFloor"))
+
+        SKTexture.preload(texturesArray) {
         var indexOfFire = 0
         for (row, line) in lines.enumerated() {
             var isEndofLine = false
@@ -309,115 +308,118 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 {
                 case "x":
                     //Load wall texture
-                    createRectTile(Wall, name: "Wall", position: position, CollisionType: CollisionTypes.wall)
+                    self.createRectTile(texturesArray[0], name: "Wall", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "v":
                     //load floor texture
-                    createRectTile(Floor, name: "Floor", position: position, CollisionType: CollisionTypes.wall)
+                    self.createRectTile(texturesArray[1], name: "Floor", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "u":
                     //load under floor texture
-                    createRectTile(UnderFloor, name: "underFloor", position: position, CollisionType: CollisionTypes.wall)
+                    self.createRectTile(texturesArray[2], name: "underFloor", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "l":
                     //load volcano alt half tile leftside
-                    createTextureTile(Lava, name: "Lava", position: position, CollisionType: CollisionTypes.fire)
+                    self.createTextureTile(texturesArray[3], name: "Lava", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "r":
                     //load volcano alt half tile right rightside
-                    createTextureTile(LavaBelow, name: "LavaBelow", position: position, CollisionType: CollisionTypes.fire)
+                    self.createRectTile(texturesArray[4], name: "LavaBelow", position: position, CollisionType: CollisionTypes.fire)
                     break;
                 case "f":
                     //load fire at bottom
-                    createTextureTile(FireBottom, name: "Fire", position: position, CollisionType: CollisionTypes.fire)
+                    self.createTextureTile(texturesArray[5], name: "FireBottom", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "d":
                     //load fire Above
-                    createTextureTile(FireTop, name: "Fire", position: position, CollisionType: CollisionTypes.fire)
+                    self.createTextureTile(texturesArray[6], name: "FireTop", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "a":
                     //load fire to the left
-                    createTextureTile(FireLeft, name: "Fire", position: position, CollisionType: CollisionTypes.fire)
+                    self.createTextureTile(texturesArray[7], name: "FireLeft", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "s":
                     //load fire to the right
-                    createTextureTile(FireRight, name: "Fire", position: position, CollisionType: CollisionTypes.fire)
+                    self.createTextureTile(texturesArray[8], name: "FireRight", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "m":
-                    //load Moving Fire
-                    moveFire.append(SKSpriteNode(texture: FireBottom))
-                    createNodeTexture(moveFire[indexOfFire], name: "Fire", position: position, CollisionType: CollisionTypes.fire)
+                    //load Moving Fire bottom on floor
+                    self.moveFire.append(SKSpriteNode(texture: texturesArray[5]))
+                    self.createNodeTexture(self.moveFire[indexOfFire], name: "Fire", position: position, CollisionType: CollisionTypes.fire)
                     
                     indexOfFire += 1
                     break
                 case "t":
                     //load Left Platform
-                    createTextureTile(VolAltHalfLeft, name: "VolAltPlatformLeft", position: position, CollisionType: CollisionTypes.wall)
+                    self.createTextureTile(texturesArray[9], name: "VolAltPlatformLeft", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "w":
                     //load Left Platform
-                    createTextureTile(VolAltHalfCentre, name: "VolAltPlatformCentre", position: position, CollisionType: CollisionTypes.wall)
+                    self.createTextureTile(texturesArray[10], name: "VolAltPlatformCentre", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "y":
                     //load right platform
-                    createTextureTile(VolAltHalfRight, name: "VolAltPlatformRight", position: position, CollisionType: CollisionTypes.wall)
+                    self.createTextureTile(texturesArray[11], name: "VolAltPlatformRight", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "b":
                     //load right platform
-                    createTextureTile(VolAltTextureLeft, name: "VolAltTextureLeft", position: position, CollisionType: CollisionTypes.wall)
+                    self.createRectTile(texturesArray[12], name: "VolAltTextureLeft", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "c":
                     //load right platform
-                    createTextureTile(VolAltTextureCentre, name: "VolAltTextureCentre", position: position, CollisionType: CollisionTypes.wall)
+                    self.createRectTile(texturesArray[13], name: "VolAltTextureCentre", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "e":
                     //load right platform
-                    createTextureTile(VolAltTextureRight, name: "VolAltTextureRight", position: position, CollisionType: CollisionTypes.wall)
+                    self.createRectTile(texturesArray[14], name: "VolAltTextureRight", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "g":
                     //load right platform
-                    createTextureTile(VolAltHalfCirLeft, name: "VolAltCirLeft", position: position, CollisionType: CollisionTypes.wall)
+                    self.createTextureTile(texturesArray[15], name: "VolAltCirLeft", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "h":
                     //load right platform
-                    createTextureTile(VolAltHalfCirRight, name: "PlatformRight", position: position, CollisionType: CollisionTypes.wall)
+                    self.createTextureTile(texturesArray[16], name: "VolAltCirRight", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "i":
                     //load right platform
-                    createTextureTile(VolTextureLeft, name: "volcanoTextureLeft", position: position, CollisionType: CollisionTypes.hotSurface)
+                    self.createRectTile(texturesArray[17], name: "volcanoTextureLeft", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "j":
-                    createTextureTile(VolTextureCentre, name: "volcanoTextureCentre", position: position, CollisionType: CollisionTypes.hotSurface)
+                    self.createRectTile(texturesArray[18], name: "volcanoTextureCentre", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "k":
-                    createTextureTile(VolTextureRight, name: "volcanoTextureRight", position: position, CollisionType: CollisionTypes.hotSurface)
+                    self.createRectTile(texturesArray[19], name: "volcanoTextureRight", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "n":
-                    createTextureTile(VolHalfRndLeft, name: "volcanoRndLeft", position: position, CollisionType: CollisionTypes.hotSurface)
+                    self.createTextureTile(texturesArray[20], name: "volcanoRndLeft", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "o":
-                    createTextureTile(VolHalfRndCentre, name: "volcanoRndCentre", position: position, CollisionType: CollisionTypes.hotSurface)
+                    self.createTextureTile(texturesArray[21], name: "volcanoRndCentre", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "p":
-                    createTextureTile(VolHalfRndRight, name: "volcanoRndRight", position: position, CollisionType: CollisionTypes.hotSurface)
+                    self.createTextureTile(texturesArray[22], name: "volcanoRndRight", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "q":
-                    createTextureTile(VolAltHalfRnd, name: "volcanoAltRnd", position: position, CollisionType: CollisionTypes.wall)
+                    self.createTextureTile(texturesArray[23], name: "volcanoAltRnd", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "A":
-                    createTextureTile(VolHalfRnd, name: "volcanoRnd", position: position, CollisionType: CollisionTypes.hotSurface)
+                    self.createTextureTile(texturesArray[24], name: "volcanoRnd", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "B":
-                    createTextureTile(BlackLava, name: "BlackLava", position: position, CollisionType: CollisionTypes.wall)
+                    self.createTextureTile(texturesArray[25], name: "BlackLava", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "C":
-                    createTextureTile(BlackLavaBelow, name: "BlackLavaBelow", position: position, CollisionType: CollisionTypes.wall)
+                    self.createRectTile(texturesArray[26], name: "BlackLavaBelow", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "D":
-                    createTextureTile(VolHalfCirLeft, name: "volcanoCirLeft", position: position, CollisionType: CollisionTypes.hotSurface)
+                    self.createTextureTile(texturesArray[27], name: "volcanoCirLeft", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "E":
-                    createTextureTile(VolHalfCirRight, name: "volcanoCirRight", position: position, CollisionType: CollisionTypes.hotSurface)
+                    self.createTextureTile(texturesArray[28], name: "volcanoCirRight", position: position, CollisionType: CollisionTypes.hotSurface)
+                    break
+                case "F":
+                    self.createRectTile(texturesArray[29], name: "volcanoFloor", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case " ":
                     //this is an empty space - do nothing!
@@ -441,7 +443,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 isEndofLine = false
                 continue
             }
+            }
         }
+        print("done")
     }
     
     func createRectTile(_ textureImg: SKTexture, name: String, position: CGPoint, CollisionType: CollisionTypes) {
@@ -490,6 +494,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func update(_ currentTime: TimeInterval) {
         guard isGameOver == false else { return }
+        //print(MainMenuScene.GameSceneLevel)
         if(player.position.y <=  tempPlayerPos - 100)
         {
             tempPlayerPos = player.position.y
@@ -517,7 +522,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func didFinishUpdate() {
         
-        //cameraNode.position.y -= 0.1
+        //cameraNode.position.y -= 1
         for moveFireIndex in moveFire
         {
             if(moveFireIndex.position.x <= 72)
@@ -566,18 +571,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 tempPlayerPos = player.position.y
             } else if node.name == "MainMenuButton"
               {
-                  print(true)
-                  if let view = self.view {
-                      // Load the SKScene from 'GameScene.sks'
-                      if let scene = SKScene(fileNamed: "MainMenu") {
-                          // Set the scale mode to scale to fit the available space
-                          scene.scaleMode = .aspectFill
-                          // Present the scene
-                          view.presentScene(scene)
-                      }
-                      view.showsFPS = true
-                      view.showsNodeCount = true
-                  }
+                // load resources on other thread
+                if let view = self.view {
+                    //Load the SKScene from 'MainMenu.sks'
+                    score = 0
+                    LoseMusic?.stop()
+                    restartButton.isHidden = true
+                    background.isHidden = true
+                    MainMenuButton.isHidden = true
+                    loseLabel.isHidden = true
+                    HighScoreLabel.isHidden = true
+                    scoreLabel.isHidden = false
+                    cameraNode.position.y = 207
+                    scene?.camera = cameraNode
+                    tempPlayerPos = player.position.y
+                    
+                    MainMenuScene = MainMenu(fileNamed: "MainMenu")
+                    MainMenuScene.scaleMode = .aspectFill
+                    MainMenuScene.SetGameScene(storedLevel)
+                    view.presentScene(MainMenuScene)
+                    view.showsFPS = true
+                }
               }
         }
         if(tapCount != 3 && !isCameraReset)
