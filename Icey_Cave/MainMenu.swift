@@ -14,8 +14,7 @@ import AVFoundation
 class MainMenu: SKScene {
 
     var GameSceneLevel: GameScene!
-    var StoredGameLevel: GameScene!
-    var LoadingScreen: LoadingScene!
+    //var LoadingScreen: LoadingScene!
     var TitleScreenMusic: AVAudioPlayer?
     override func didMove(to view: SKView) {
         let path = Bundle.main.path(forResource: "Music/TitleMusic.mp3", ofType:nil)!
@@ -63,7 +62,9 @@ class MainMenu: SKScene {
                     
                     self?.TitleScreenMusic?.stop()
                     
-                    view.presentScene(self?.GameSceneLevel)
+                    let transition = SKTransition.reveal(with: .up, duration: 0.8)
+                    
+                    view.presentScene(self!.GameSceneLevel, transition: transition)
                     view.ignoresSiblingOrder = true
                     view.showsFPS = true
                     view.showsPhysics = true

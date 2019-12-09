@@ -43,6 +43,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var HighScoreLabel: SKLabelNode!
     var highScore = UserDefaults().integer(forKey: "HIGHSCORE")
     var isGameOver = false
+    var isPlayerDead = false
     var isCameraReset = false
     var isMovingForward = false
     var isMovingBackwards = false
@@ -61,6 +62,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func sceneDidLoad() {
         
+        DispatchQueue.main.async { [weak self] in
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate
+            appDelegate?.gameScene = self
+        }
+                
         UserDefaults().set(0, forKey: "HIGHSCORE")
         
         motionManager = CMMotionManager()
@@ -75,8 +81,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         } catch {
             // couldn't load file
         }
-        
-        let Losepath = Bundle.main.path(forResource: "Music/loseMusic.wav", ofType:nil)!
+                
+        let Losepath = Bundle.main.path(forResource: "Music/loseMusic.mp3", ofType:nil)!
         let loseUrl = URL(fileURLWithPath: Losepath)
 
         do {
@@ -92,8 +98,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         isGameOver = false
         backgroundMusic?.play()
         physicsWorld.contactDelegate = self
+        restartButton.isHidden = true
+        background.isHidden = true
+        MainMenuButton.isHidden = true
+        loseLabel.isHidden = true
+        HighScoreLabel.isHidden = true
+        scoreLabel.isHidden = false
+        cameraNode.position.y = 207
         createPlayer()
         tempPlayerPos = player.position.y
+    }
+    
+    override func willMove(from view: SKView) {
+        print("removed")
+    }
+    
+    func SetGamePaused(_ isPaused: Bool)
+    {
+        isGameOver = isPaused
     }
     
     func createSKLabel(_ node: SKLabelNode, name: String, text: String, fontSize: Int , position: CGPoint, isHidden: Bool)
@@ -131,7 +153,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.physicsBody?.linearDamping = 0
         
         player.physicsBody?.categoryBitMask = CollisionTypes.player.rawValue
-        player.physicsBody?.contactTestBitMask = CollisionTypes.hotSurface.rawValue | CollisionTypes.fire.rawValue | CollisionTypes.finish.rawValue
+        player.physicsBody?.contactTestBitMask = CollisionTypes.hotSurface.rawValue | CollisionTypes.fire.rawValue
         addChild(player)
     }
     
@@ -143,13 +165,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func createRestartMenu() {
-        
         scoreLabel = SKLabelNode(fontNamed: "Ice Caps")
-        scoreLabel.text = "0ft"
-        scoreLabel.horizontalAlignmentMode = .left
-        scoreLabel.position = CGPoint(x: 50, y: 20)
-        scoreLabel.zPosition = 2
-        addChild(scoreLabel)
+        createSKLabel(scoreLabel, name: "Score", text: "0ft", fontSize: 32, position: CGPoint(x: 50, y: 20), isHidden: false)
         
         background = SKSpriteNode(color: UIColor.black, size: CGSize(width: 950, height: 450))
         background.name = "RestartBackground"
@@ -171,20 +188,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         loseLabel = SKLabelNode(fontNamed: "Guevara")
         createSKLabel(loseLabel, name: "Lost", text: "Depth: \(score)", fontSize: 40, position: CGPoint(x: 350, y: 80), isHidden: true)
     }
-    
-    func PlayMusic(AVPlayer: AVAudioPlayer, URLpath: String) {
-        let path = Bundle.main.path(forResource: URLpath, ofType:nil)!
-        let url = URL(fileURLWithPath: path)
-        var AudioPlayer = AVPlayer
-        do {
-            AudioPlayer = try AVAudioPlayer(contentsOf: url)
-            AudioPlayer.numberOfLoops = -1 //Loops forever
-            AudioPlayer.play()
-        } catch {
-            // couldn't load file
-        }
-    }
-    
+        
     func saveHighScore() {
         UserDefaults.standard.set(score, forKey: "HIGHSCORE")
         HighScoreLabel.text = "High Score: \(UserDefaults().integer(forKey: "HIGHSCORE"))"
@@ -194,6 +198,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     {
         player.physicsBody?.isDynamic = false
         isGameOver = true
+        isPlayerDead = true
         scoreLabel.isHidden = true
         background.position = (scene?.camera?.position)!
         loseLabel.position.y = (cameraNode.position.y + 80)
@@ -265,7 +270,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //Load image files
         var texturesArray: Array<SKTexture> = Array()
         
-        //let Wall = SKTexture(imageNamed: "Wall")
         texturesArray.append(SKTexture(imageNamed: "Wall"))
         texturesArray.append(SKTexture(imageNamed: "Floor"))
         texturesArray.append(SKTexture(imageNamed: "underFloor"))
@@ -297,92 +301,74 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         texturesArray.append(SKTexture(imageNamed: "HalfCirRight"))
         texturesArray.append(SKTexture(imageNamed: "volcanoAltFloor"))
 
-        SKTexture.preload(texturesArray) {
+        SKTexture.preload(texturesArray) { //Preload the array of SKTextures
         var indexOfFire = 0
         for (row, line) in lines.enumerated() {
             var isEndofLine = false
             for (column, letter) in line.enumerated() {
                 let position = CGPoint(x: (24 * column), y: (-24 * row) + 414)
-                
+                //Create the textures and set the position of where they are in the txt file
                 switch(letter)
                 {
                 case "x":
-                    //Load wall texture
                     self.createRectTile(texturesArray[0], name: "Wall", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "v":
-                    //load floor texture
                     self.createRectTile(texturesArray[1], name: "Floor", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "u":
-                    //load under floor texture
                     self.createRectTile(texturesArray[2], name: "underFloor", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "l":
-                    //load volcano alt half tile leftside
                     self.createTextureTile(texturesArray[3], name: "Lava", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "r":
-                    //load volcano alt half tile right rightside
                     self.createRectTile(texturesArray[4], name: "LavaBelow", position: position, CollisionType: CollisionTypes.fire)
                     break;
                 case "f":
-                    //load fire at bottom
                     self.createTextureTile(texturesArray[5], name: "FireBottom", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "d":
-                    //load fire Above
                     self.createTextureTile(texturesArray[6], name: "FireTop", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "a":
-                    //load fire to the left
                     self.createTextureTile(texturesArray[7], name: "FireLeft", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "s":
-                    //load fire to the right
                     self.createTextureTile(texturesArray[8], name: "FireRight", position: position, CollisionType: CollisionTypes.fire)
                     break
                 case "m":
-                    //load Moving Fire bottom on floor
+                    //Create Fire that moves right to left on the floor
                     self.moveFire.append(SKSpriteNode(texture: texturesArray[5]))
                     self.createNodeTexture(self.moveFire[indexOfFire], name: "Fire", position: position, CollisionType: CollisionTypes.fire)
                     
                     indexOfFire += 1
                     break
                 case "t":
-                    //load Left Platform
                     self.createTextureTile(texturesArray[9], name: "VolAltPlatformLeft", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "w":
-                    //load Left Platform
                     self.createTextureTile(texturesArray[10], name: "VolAltPlatformCentre", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "y":
-                    //load right platform
                     self.createTextureTile(texturesArray[11], name: "VolAltPlatformRight", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "b":
-                    //load right platform
                     self.createRectTile(texturesArray[12], name: "VolAltTextureLeft", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "c":
-                    //load right platform
                     self.createRectTile(texturesArray[13], name: "VolAltTextureCentre", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "e":
-                    //load right platform
                     self.createRectTile(texturesArray[14], name: "VolAltTextureRight", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "g":
-                    //load right platform
                     self.createTextureTile(texturesArray[15], name: "VolAltCirLeft", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "h":
-                    //load right platform
                     self.createTextureTile(texturesArray[16], name: "VolAltCirRight", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case "i":
-                    //load right platform
                     self.createRectTile(texturesArray[17], name: "volcanoTextureLeft", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "j":
@@ -429,23 +415,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     break;
                 default:
                     break;
-                    //fatalError("Unknown level letter: \(letter)")
                 }
-                if(letter == "/")
+                    if(letter == "/")
+                    {
+                        //ignores every letter after "/" and continues onto the next line
+                        isEndofLine = true
+                        break
+                    }
+                }
+                if(isEndofLine)
                 {
-                    //ignores every letter after "/" and continues onto the next line
-                    isEndofLine = true
-                    break
+                    isEndofLine = false
+                    continue
                 }
-            }
-            if(isEndofLine)
-            {
-                isEndofLine = false
-                continue
-            }
             }
         }
-        print("done")
     }
     
     func createRectTile(_ textureImg: SKTexture, name: String, position: CGPoint, CollisionType: CollisionTypes) {
@@ -494,7 +478,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func update(_ currentTime: TimeInterval) {
         guard isGameOver == false else { return }
-        //print(MainMenuScene.GameSceneLevel)
+        
         if(player.position.y <=  tempPlayerPos - 100)
         {
             tempPlayerPos = player.position.y
@@ -514,39 +498,36 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 scene?.camera = cameraNode
             }
         }
-        if let accelerometerData = motionManager?.accelerometerData
-        {
-            physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -16, dy: -9.8)
-        }
-    }
-    
-    override func didFinishUpdate() {
         
-        //cameraNode.position.y -= 1
+        if let accelerometerData = motionManager?.accelerometerData
+            {
+                physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -16, dy: -9.8)
+            }
+        
         for moveFireIndex in moveFire
-        {
-            if(moveFireIndex.position.x <= 72)
             {
-                moveFireIndex.run(SKAction.moveTo(x: 790, duration: 1.5))
-                isMovingForward = moveFireIndex.position.x >= 789 ? false : true
+                if(moveFireIndex.position.x <= 72)
+                {
+                    moveFireIndex.run(SKAction.moveTo(x: 790, duration: 1.5))
+                    isMovingForward = moveFireIndex.position.x >= 789 ? false : true
+                }
+                else if(moveFireIndex.position.x >= 789)
+                {
+                    moveFireIndex.run(SKAction.moveTo(x: 71, duration: 1.5))
+                    isMovingForward = moveFireIndex.position.x <= 51 ? true : false
+                }
             }
-            else if(moveFireIndex.position.x >= 789)
+        
+            if(player.position.y <= cameraNode.position.y)
             {
-                moveFireIndex.run(SKAction.moveTo(x: 71, duration: 1.5))
-                isMovingForward = moveFireIndex.position.x <= 51 ? true : false
-            }
-        }
-    
-        if(player.position.y <= cameraNode.position.y)
-        {
 
-            cameraNode.position.y -=  cameraNode.position.y - player.position.y
-            resetCameraSpeed += cameraNode.position.y - player.position.y
+                cameraNode.position.y -=  cameraNode.position.y - player.position.y
+                resetCameraSpeed += cameraNode.position.y - player.position.y
+                scene?.camera = cameraNode
+            }
             scene?.camera = cameraNode
-        }
-        scene?.camera = cameraNode
-        //Set the position of the score with the scene camera so it moves with it
-        scoreLabel.position.y = (scene?.camera?.position.y)! + 160
+            //Set the position of the score with the scene camera so it moves with it
+            scoreLabel.position.y = (scene?.camera?.position.y)! + 160
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -565,6 +546,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 loseLabel.isHidden = true
                 HighScoreLabel.isHidden = true
                 scoreLabel.isHidden = false
+                isPlayerDead = false
                 isGameOver = false
                 isCameraReset = true
                 createPlayer()
@@ -576,20 +558,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     //Load the SKScene from 'MainMenu.sks'
                     score = 0
                     LoseMusic?.stop()
-                    restartButton.isHidden = true
-                    background.isHidden = true
-                    MainMenuButton.isHidden = true
-                    loseLabel.isHidden = true
-                    HighScoreLabel.isHidden = true
-                    scoreLabel.isHidden = false
-                    cameraNode.position.y = 207
                     scene?.camera = cameraNode
                     tempPlayerPos = player.position.y
+                    isPlayerDead = false
                     
                     MainMenuScene = MainMenu(fileNamed: "MainMenu")
                     MainMenuScene.scaleMode = .aspectFill
                     MainMenuScene.SetGameScene(storedLevel)
-                    view.presentScene(MainMenuScene)
+                    let transition = SKTransition.moveIn(with: .up, duration: 1)
+                    view.presentScene(MainMenuScene, transition: transition)
                     view.showsFPS = true
                 }
               }

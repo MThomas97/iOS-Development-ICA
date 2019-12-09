@@ -1,6 +1,6 @@
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xx                     dd      dd   xx      / x - Wall
-xx   lr                             xx      / v - Floor
+xx                                  xx      / v - Floor
 xx               f                  xx      / u - underFloor
 xx              vvvvvvvvvvvvvvvvvvvvxx      / l - volcano lava
 xx         ty                       xx	    / r - volcano lava below

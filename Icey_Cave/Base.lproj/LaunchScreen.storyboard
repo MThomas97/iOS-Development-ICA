@@ -21,10 +21,11 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Get Ready" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yVB-Yk-FKW">
-                                <rect key="frame" x="284" y="85" width="329" height="80"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Get Ready" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yVB-Yk-FKW">
+                                <rect key="frame" x="284" y="85" width="328" height="80"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="80" id="3pi-x6-tau"/>
+                                    <constraint firstAttribute="width" constant="328" placeholder="YES" id="tnP-Wc-SCQ"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="Rockwell-Regular" family="Rockwell" pointSize="60"/>
                                 <nil key="textColor"/>
