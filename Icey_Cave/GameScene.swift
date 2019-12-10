@@ -19,58 +19,61 @@ enum CollisionTypes : UInt32 {
     case wall = 2
     case hotSurface = 4
     case fire = 8
-    case finish = 16
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
-    var MainMenuScene: MainMenu!
-    var storedLevel: GameScene!
-    var motionManager: CMMotionManager?
-    var RestartScene = SKScene()
-    var backgroundMusic: AVAudioPlayer?
-    var LoseMusic: AVAudioPlayer?
-    var player: SKSpriteNode!
-    var moveFire: Array<SKSpriteNode> = Array()
-    var cameraNode = SKCameraNode()
-    var Walls: SKSpriteNode = SKSpriteNode()
-    var FireObjects: SKSpriteNode = SKSpriteNode()
-    var scoreLabel: SKLabelNode!
-    var restartButton: SKLabelNode!
-    var MainMenuButton: SKLabelNode!
-    var background: SKSpriteNode!
-    var loseLabel: SKLabelNode!
-    var HighScoreLabel: SKLabelNode!
-    var highScore = UserDefaults().integer(forKey: "HIGHSCORE")
-    var isGameOver = false
-    var isPlayerDead = false
-    var isCameraReset = false
-    var isMovingForward = false
-    var isMovingBackwards = false
-    var tempPlayerPos = CGFloat(0)
-    var playerColourBlend = CGFloat(0.1)
-    var tapCount = 0
-    var applyYimpulse = CGFloat(5)
-    var resetCameraSpeed = CGFloat(8)
-    var runOnce = 0
-    let hotSurface = SKAction.colorize(with: UIColor.red, colorBlendFactor: CGFloat(1), duration: 2.0)
-    var score = 0 {
+    public var storedLevel: GameScene!
+    public var isPlayerDead = false
+
+    private var MainMenuScene: MainMenu!
+    private var motionManager: CMMotionManager?
+    private var RestartScene = SKScene()
+    private var backgroundMusic: AVAudioPlayer?
+    private var LoseMusic: AVAudioPlayer?
+    
+    private var player: SKSpriteNode!
+    private var background: SKSpriteNode!
+
+    private var moveFire: Array<SKSpriteNode> = Array()
+    private var cameraNode = SKCameraNode()
+    private var scoreLabel: SKLabelNode!
+    private var restartButton: SKLabelNode!
+    private var MainMenuButton: SKLabelNode!
+    private var loseLabel: SKLabelNode!
+    
+    private var HighScoreLabel: SKLabelNode!
+    private var highScore = UserDefaults().integer(forKey: "HIGHSCORE")
+    
+    private var isGameOver = false
+    private var isCameraReset = false
+    
+    private var tempPlayerPos = CGFloat(0)
+    private var playerColourBlend = CGFloat(0.1)
+    private var applyYimpulse = CGFloat(5)
+    private var resetCameraSpeed = CGFloat(8)
+    private let hotSurface = SKAction.colorize(with: UIColor.red, colorBlendFactor: CGFloat(1), duration: 2.0)
+    
+    private var tapCount = 0
+    private var score = 0 {
     didSet {
         scoreLabel.text = "\(score)ft"
         }
     }
     
     override func sceneDidLoad() {
-        
+        //Gets the app delegate in the application and does it on the main thread
         DispatchQueue.main.async { [weak self] in
             let appDelegate = UIApplication.shared.delegate as? AppDelegate
             appDelegate?.gameScene = self
         }
                 
-        UserDefaults().set(0, forKey: "HIGHSCORE")
+        UserDefaults().set(0, forKey: "HIGHSCORE") //Initally sets the highscore to 0
         
-        motionManager = CMMotionManager()
-        motionManager?.startAccelerometerUpdates()
+        motionManager = CMMotionManager() //Gets the CMMotionManger for Acceleromemter
+        motionManager?.startAccelerometerUpdates() //Starts checking for updated of accelermeter
+        
+        //Load the mp3 file into a AVAudioPlayer then preloads it and play the audio
         let path = Bundle.main.path(forResource: "Music/WinterMusic.mp3", ofType:nil)!
         let url = URL(fileURLWithPath: path)
 
@@ -95,6 +98,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func didMove(to view: SKView) {
+        //Gets called everytime the scene is moved into the SKView and Resets the scene
         isGameOver = false
         backgroundMusic?.play()
         physicsWorld.contactDelegate = self
@@ -109,17 +113,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         tempPlayerPos = player.position.y
     }
     
-    override func willMove(from view: SKView) {
-        print("removed")
-    }
-    
     func SetGamePaused(_ isPaused: Bool)
     {
         isGameOver = isPaused
     }
     
     func createSKLabel(_ node: SKLabelNode, name: String, text: String, fontSize: Int , position: CGPoint, isHidden: Bool)
-    {
+    { //Creates SKLabels
         node.name = name
         node.text = text
         node.fontSize = CGFloat(fontSize)
@@ -133,7 +133,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func didBegin(_ contact: SKPhysicsContact) {
         guard let nodeA = contact.bodyA.node else { return }
         guard let nodeB = contact.bodyB.node else { return }
-        
+        //Checks the player with collision of other nodes
         if (nodeA == player){
             print("hit")
             playerCollided(with: nodeB)
@@ -142,8 +142,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    func createPlayer() {
-        player = SKSpriteNode(imageNamed: "snowBall2")
+    func createPlayer() { //Loads the SKSPrite and contactTestBitMask for collisions
+        player = SKSpriteNode(imageNamed: "snowBall")
         player.size = CGSize(width: 22, height: 22)
         player.name = "player"
         player.position = CGPoint(x: 800, y: 380)
@@ -157,14 +157,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(player)
     }
     
-    func createCameraNode() {
+    func createCameraNode() { //Creates a cameraNode sets the scene camera to it
         cameraNode.position = CGPoint(x: scene!.size.width / 2, y: scene!.size.height / 2)
-        print(scene!.size)
         scene?.addChild(cameraNode)
         scene?.camera = cameraNode
     }
     
-    func createRestartMenu() {
+    public func createRestartMenu() { //Creates all the SKLabels/SpriteNodes and adds to scene
         scoreLabel = SKLabelNode(fontNamed: "Ice Caps")
         createSKLabel(scoreLabel, name: "Score", text: "0ft", fontSize: 32, position: CGPoint(x: 50, y: 20), isHidden: false)
         
@@ -189,13 +188,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         createSKLabel(loseLabel, name: "Lost", text: "Depth: \(score)", fontSize: 40, position: CGPoint(x: 350, y: 80), isHidden: true)
     }
         
-    func saveHighScore() {
+    func saveHighScore() { //Using User Defaults set the highscore with the value score
         UserDefaults.standard.set(score, forKey: "HIGHSCORE")
         HighScoreLabel.text = "High Score: \(UserDefaults().integer(forKey: "HIGHSCORE"))"
     }
     
     func SetDeathScreen(_ node: SKNode)
-    {
+    {//When the player dies Load the death screen, score, restart and back to main menu
         player.physicsBody?.isDynamic = false
         isGameOver = true
         isPlayerDead = true
@@ -214,6 +213,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         tapCount = 0
         playerColourBlend = 0.1
         
+        /*Checks if the players current score is greater or equal to UserDefaults HighScore
+        if so set it.*/
         if score >= UserDefaults().integer(forKey: "HIGHSCORE")
         {
             saveHighScore()
@@ -223,32 +224,35 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let scale = SKAction.scale(to: 0.0001, duration: 0.25)
         let remove = SKAction.removeFromParent()
         let sequence = SKAction.sequence([move, scale, remove])
-        
-        player.run(sequence) { [weak self] in
+        //Moves the player and decreaes the scale then removes the player node
+        player.run(sequence) { [weak self] in //Runs the sequence
             if (!((self?.player.parent) != nil))
             {
-                self?.LoseMusic?.play()
                 self?.backgroundMusic?.stop()
+                self?.LoseMusic?.prepareToPlay()
+                self?.LoseMusic?.play()
             }
         }
     }
     
-    func playerCollided(with node: SKNode){
+    func playerCollided(with node: SKNode){ //Checks for player collision
         if (node.physicsBody?.categoryBitMask == CollisionTypes.fire.rawValue) {
-            SetDeathScreen(node)
+            SetDeathScreen(node) //if the player collides with fire kill the player
         } else if node.physicsBody?.categoryBitMask == CollisionTypes.wall.rawValue {
+            //Reset SKAction Nodes
             if let action = player.action(forKey: "hotSurface")
             {
                 action.speed = 0
             }
-            tapCount = 0
+            tapCount = 0 //If the player collide with the wall/floor reset the jump count
         } else if node.physicsBody?.categoryBitMask == CollisionTypes.hotSurface.rawValue {
+            //if the player collides with hot surface then slowly the player gets redder
             let hotSurface = SKAction.colorize(with: UIColor.red, colorBlendFactor: CGFloat(1.2), duration: 1.0)
             hotSurface.speed = 1
             player.run(hotSurface, withKey: "hotSurface")
             playerColourBlend += 0.2
             
-            if(player.colorBlendFactor >= 1)
+            if(player.colorBlendFactor >= 1) //if the colourBlend of red hits 1 the player dies
             {
                 SetDeathScreen(node)
             }
@@ -261,15 +265,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    public func loadLevel() {
+    public func loadLevel() { //Load the level from a txt file
+        //Gets the levelURL in the project
         guard let levelURL = Bundle.main.url(forResource: "level1", withExtension: "txt") else { fatalError("Could not find level1.txt in the app bundle.") }
         guard let levelString = try? String(contentsOf: levelURL) else {
             fatalError("Could not find level1.txt in the app bundle.") }
         
         let lines = levelString.components(separatedBy: "\n")
-        //Load image files
-        var texturesArray: Array<SKTexture> = Array()
         
+        var texturesArray: Array<SKTexture> = Array()
+        //Addes all the SKTextures to texturesArray
         texturesArray.append(SKTexture(imageNamed: "Wall"))
         texturesArray.append(SKTexture(imageNamed: "Floor"))
         texturesArray.append(SKTexture(imageNamed: "underFloor"))
@@ -301,7 +306,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         texturesArray.append(SKTexture(imageNamed: "HalfCirRight"))
         texturesArray.append(SKTexture(imageNamed: "volcanoAltFloor"))
 
-        SKTexture.preload(texturesArray) { //Preload the array of SKTextures
+        //Preloads the array of SKTextures, then creates the level
+        SKTexture.preload(texturesArray) {
         var indexOfFire = 0
         for (row, line) in lines.enumerated() {
             var isEndofLine = false
@@ -309,7 +315,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 let position = CGPoint(x: (24 * column), y: (-24 * row) + 414)
                 //Create the textures and set the position of where they are in the txt file
                 switch(letter)
-                {
+                {//letters like "x" are used for the walls and is used to create a level
                 case "x":
                     self.createRectTile(texturesArray[0], name: "Wall", position: position, CollisionType: CollisionTypes.wall)
                     break
@@ -424,7 +430,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     }
                 }
                 if(isEndofLine)
-                {
+                {//If true continue onto the next row
                     isEndofLine = false
                     continue
                 }
@@ -432,7 +438,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    func createRectTile(_ textureImg: SKTexture, name: String, position: CGPoint, CollisionType: CollisionTypes) {
+    func createRectTile(_ textureImg: SKTexture, name: String, position: CGPoint, CollisionType: CollisionTypes) { //Creates a SKSprite node with rectangle physicsBody
         let node = SKSpriteNode(texture: textureImg)
         node.name = name
         node.position = position
@@ -447,7 +453,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(node)
     }
     
-    func createNodeTexture(_ node: SKSpriteNode, name: String, position: CGPoint, CollisionType: CollisionTypes) {
+    func createNodeTexture(_ node: SKSpriteNode, name: String, position: CGPoint, CollisionType: CollisionTypes) {//Used for the Move Fire that passes in a SKNode and sets physicsBody
         node.name = name
         node.position = position
         node.size = CGSize(width: 24, height: 24)
@@ -462,6 +468,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func createTextureTile(_ textureImg: SKTexture, name: String, position: CGPoint, CollisionType: CollisionTypes) {
+        //Creates a SKSprite node with more expensive texture collision physicsBody
         let node = SKSpriteNode(texture: textureImg)
         node.name = name
         node.position = position
@@ -477,17 +484,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        guard isGameOver == false else { return }
+        guard isGameOver == false else { return } //if isGameOver is true stop updating
         
         if(player.position.y <=  tempPlayerPos - 100)
+            //Checks if the player has moved enough downwards and if so add 1 to the score
         {
             tempPlayerPos = player.position.y
             score += 1
         }
-        if(isCameraReset)
+        if(isCameraReset) //if the cameraReset is true move the cameraNode back to the start
         {
             if(cameraNode.position.y >= 207)
-            {
+            { //Checks once the cameraNode is back at the top of the level
                 isCameraReset = false
                 player.physicsBody?.isDynamic = true
             }
@@ -498,34 +506,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 scene?.camera = cameraNode
             }
         }
-        
+        /*if the motionManager has accelermemterData set the phsyicsworld gravity
+        *and move the player in the y direction depending of where the device is tilting*/
         if let accelerometerData = motionManager?.accelerometerData
             {
                 physicsWorld.gravity = CGVector(dx: accelerometerData.acceleration.y * -16, dy: -9.8)
             }
         
-        for moveFireIndex in moveFire
+        for moveFireIndex in moveFire //Goes through all of the moveFire Nodes
             {
                 if(moveFireIndex.position.x <= 72)
-                {
+                { //if at the leftside of the screen then moves the node to 790 in the x axis
                     moveFireIndex.run(SKAction.moveTo(x: 790, duration: 1.5))
-                    isMovingForward = moveFireIndex.position.x >= 789 ? false : true
-                }
+                } //if at the rightside of the screen then moves the node to 71 in the x axis
                 else if(moveFireIndex.position.x >= 789)
                 {
                     moveFireIndex.run(SKAction.moveTo(x: 71, duration: 1.5))
-                    isMovingForward = moveFireIndex.position.x <= 51 ? true : false
                 }
             }
         
             if(player.position.y <= cameraNode.position.y)
-            {
-
+            {//Moves the cameraNode to follow the player position if it goes below the cameraNode
                 cameraNode.position.y -=  cameraNode.position.y - player.position.y
                 resetCameraSpeed += cameraNode.position.y - player.position.y
                 scene?.camera = cameraNode
             }
-            scene?.camera = cameraNode
+            scene?.camera = cameraNode //Sets the scene camera to the cameraNode
             //Set the position of the score with the scene camera so it moves with it
             scoreLabel.position.y = (scene?.camera?.position.y)! + 160
     }
@@ -534,9 +540,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if let touch = touches.first {
             let position = touch.location(in: self)
             let node = atPoint(position)
-            print(node.position)
             if node.name == "RestartButton"
-            {
+            { //Gets position of the touch and if its the restartbutton node restart the game
                 score = 0
                 LoseMusic?.stop()
                 backgroundMusic?.play()
@@ -552,27 +557,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 createPlayer()
                 tempPlayerPos = player.position.y
             } else if node.name == "MainMenuButton"
-              {
-                // load resources on other thread
-                if let view = self.view {
-                    //Load the SKScene from 'MainMenu.sks'
+              {//if the main menu button is pressed, stop music and load the MainMenu Scene
                     score = 0
                     LoseMusic?.stop()
                     scene?.camera = cameraNode
                     tempPlayerPos = player.position.y
                     isPlayerDead = false
                     
+                    if let view = self.view {
                     MainMenuScene = MainMenu(fileNamed: "MainMenu")
                     MainMenuScene.scaleMode = .aspectFill
+                    /*Passes in the preLoaded level scene instead of having to load the
+                    *whole level again (Plays the GameScene instantly*/
                     MainMenuScene.SetGameScene(storedLevel)
                     let transition = SKTransition.moveIn(with: .up, duration: 1)
                     view.presentScene(MainMenuScene, transition: transition)
                     view.showsFPS = true
                 }
-              }
+            }
         }
+        
         if(tapCount != 3 && !isCameraReset)
-        {
+        {//Limits the amount of taps to jump to 3
             player.physicsBody!.applyImpulse(CGVector(dx: 1, dy: applyYimpulse))
             tapCount += 1
         }

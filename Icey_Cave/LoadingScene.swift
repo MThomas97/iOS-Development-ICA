@@ -20,7 +20,8 @@ class LoadingScene: SKScene {
         let group = DispatchGroup()
         group.enter()
         
-        //Preloads GameScene level in another thread
+        //Preloads GameScene level in another thread, when the game is launched
+        // load resources on other thread
         DispatchQueue.global(qos: .userInteractive).async { [weak self] in
             self?.GameSceneLevel = GameScene(fileNamed: "GameScene")!
             self?.GameSceneLevel.scaleMode = .aspectFill
@@ -30,14 +31,14 @@ class LoadingScene: SKScene {
             group.leave()
         }
         
-        //Wait till the level has been loaded
+        //Wait till the level has been loaded on other thread
         group.wait()
         
-        // load resources on other thread
         if let view = self.view {
             //Load the SKScene from 'MainMenu.sks'
             MainMenuScene = MainMenu(fileNamed: "MainMenu")
             MainMenuScene.scaleMode = .aspectFill
+            //Sets the preloaded GameScene in local MainMenu GameScene to be used later
             MainMenuScene.SetGameScene(GameSceneLevel)
             view.presentScene(MainMenuScene)
             view.showsFPS = true

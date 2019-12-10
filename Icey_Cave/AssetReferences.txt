@@ -1,2 +1,19 @@
 References of all of the images and sounds I have used:
-https://opengameart.org/content/lose-music-1
+
+-Tiles/Sprites-
+SnowBall Sprite - https://www.uihere.com/free-cliparts/computer-icons-clip-art-snowball-2454930
+Fire Sprite - https://opengameart.org/content/fire-wave-32x32
+Ice/Snow TileSet - https://opengameart.org/content/platformer-art-ice-world
+Volcano TileSet - https://opengameart.org/content/2d-platformer-volcano-pack-11
+
+-Music-
+MainMenu Background Music - https://opengameart.org/content/exploring-a-cave
+GameScene Background Music - https://opengameart.org/content/icy-realm-seven-and-eight
+Lose Music - https://opengameart.org/content/lose-music-1
+
+-Fonts-
+Ice Caps Font - https://www.dafont.com/ice-caps.font
+Guevara Font - https://www.dafont.com/guevara.font
+
+-AppIcon-
+AppIcon - https://webstockreview.net/pict/get

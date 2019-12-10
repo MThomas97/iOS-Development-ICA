@@ -21,9 +21,8 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // load resources on other thread
         if let view = self.view as! SKView? {
-            //Load the SKScene from 'MainMenu.sks'
+            //Load the SKScene from 'LoadingScene.sks'
             if let scene = SKScene(fileNamed: "LoadingScene") {
                 scene.scaleMode = .aspectFill
                 

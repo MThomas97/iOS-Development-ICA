@@ -23,9 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+        //When the application is about to be inactive, Pause the game
         gameScene.SetGamePaused(true)
         print("Application is Paused")
-        print(gameScene.isGameOver)
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
@@ -40,11 +40,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        //Checks if the player has died in the GameScene and if don't unpause the game
+        /*Checks if the player has died in the GameScene when the application becomes active
+        again and if so don't unpause the game*/
         if (gameScene.isPlayerDead == false) {
             gameScene.SetGamePaused(false)
         }
-        print(gameScene.isGameOver)
         print("Resumed Game")
     }
 }
