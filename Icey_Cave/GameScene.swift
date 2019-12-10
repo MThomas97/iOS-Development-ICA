@@ -25,7 +25,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     public var storedLevel: GameScene!
     public var isPlayerDead = false
-
+    
     private var MainMenuScene: MainMenu!
     private var motionManager: CMMotionManager?
     private var RestartScene = SKScene()
@@ -411,7 +411,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     self.createTextureTile(texturesArray[28], name: "volcanoCirRight", position: position, CollisionType: CollisionTypes.hotSurface)
                     break
                 case "F":
-                    self.createRectTile(texturesArray[29], name: "volcanoFloor", position: position, CollisionType: CollisionTypes.hotSurface)
+                    self.createRectTile(texturesArray[29], name: "volcanoFloor", position: position, CollisionType: CollisionTypes.wall)
                     break
                 case " ":
                     //this is an empty space - do nothing!

@@ -73,7 +73,6 @@ class MainMenu: SKScene {
                     self?.TitleScreenMusic?.stop()
                     
                     let transition = SKTransition.reveal(with: .up, duration: 0.8)
-                    
                     view.presentScene(self!.GameSceneLevel, transition: transition)
                     view.ignoresSiblingOrder = true
                     view.showsFPS = true

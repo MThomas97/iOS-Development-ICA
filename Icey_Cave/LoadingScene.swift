@@ -33,14 +33,16 @@ class LoadingScene: SKScene {
         
         //Wait till the level has been loaded on other thread
         group.wait()
-        
+
         if let view = self.view {
             //Load the SKScene from 'MainMenu.sks'
             MainMenuScene = MainMenu(fileNamed: "MainMenu")
+
             MainMenuScene.scaleMode = .aspectFill
             //Sets the preloaded GameScene in local MainMenu GameScene to be used later
             MainMenuScene.SetGameScene(GameSceneLevel)
-            view.presentScene(MainMenuScene)
+            let transition = SKTransition.fade(withDuration: 2)
+            view.presentScene(MainMenuScene, transition: transition)
             view.showsFPS = true
         }
     }    
